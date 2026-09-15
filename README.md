@@ -63,7 +63,7 @@ The simulated neurons come from FlyWire. Each is drawn at the cell body of a mal
 
 | | |
 |---|---|
-| Song | 48 slots, 400 ms apart. Each slot is a note in lane 1–3 or a rest (16 of 48 are rests). |
+| Song | 48 slots, 400 ms apart. Each slot is a note in lane 1-3 or a rest (16 of 48 are rests). |
 | State | What the fly's eyes see as a slot approaches: the visual neurons for that lane get 150 Hz input from 200 ms before the hit line. |
 | Actions | Press lane 1, 2 or 3, or wait. The press registers 40 ms after the hit line, inside the ±150 ms window humans get. |
 | Reward | +1 hit, −1 wrong lane, −1 miss, −0.5 press on a rest, 0 wait on a rest |
@@ -105,7 +105,7 @@ All the numbers above were set once, before the full experiment runs. They are r
 Setup: 5 seeds × 30 training episodes on "Banana Drift" (32 notes, 16 rests), then one frozen play of the unseen song "Wing Hum". The raw console output is in `notes/experiments.log`; full curves are in `data/results.json`.
 
 - **Before** is a frozen play before any learning.
-- **Last 5** is the mean hit % over episodes 26–30.
+- **Last 5** is the mean hit % over episodes 26-30.
 - **Seeds ≥80%** counts seeds whose 3-episode moving average reached 80%.
 
 All values are mean ± sd across seeds, as % of notes hit.
@@ -121,11 +121,11 @@ All values are mean ± sd across seeds, as % of notes hit.
 | B-random | 23.1 | 23.1 | 47.5 ± 15.5 | 0/5 | 43.6 ± 17.1 | 13.0 / 16 |
 | B-real, 150 episodes (3 seeds) | 21.9 | 30.2 | 74.8 ± 0.6 | 0/3 | 68.4 ± 1.2 | 8.0 / 16 |
 
-For the 150-episode row, "Last 5" means episodes 146–150.
+For the 150-episode row, "Last 5" means episodes 146-150.
 
 ### What the controls support
 
-**Headline (supported).** The Bio-RL fly goes from 40% to 96% of notes hit in 30 plays. Every seed passes 80% by play 3–4. It scores 96% on a song it never trained on. Blocking its dopamine neurons keeps it at 41%.
+**Headline (supported).** The Bio-RL fly goes from 40% to 96% of notes hit in 30 plays. Every seed passes 80% by play 3-4. It scores 96% on a song it never trained on. Blocking its dopamine neurons keeps it at 41%.
 
 The learning happens inside the simulated connectome, through dopamine-gated KC→MBON plasticity, with no trained readout.
 
@@ -146,7 +146,7 @@ This comparison has caveats:
 
 **More training doesn't close the gap.** With 5× the budget (150 episodes, 3 seeds), Deep-RL on real wiring levels off at 74.8% ± 0.6 and scores 68.4% on the unseen song. That's still well below the 96% Bio-RL reaches in 30 episodes.
 
-**Where the 40% starting point comes from.** Before learning, MBON groups 1 and 2 respond to every lane and group 3 barely responds. The untrained fly therefore mostly presses lanes 1–2, which lands about 40% of notes. That's a structural bias, not skill, and it's why the blocked-dopamine control sits at the same level.
+**Where the 40% starting point comes from.** Before learning, MBON groups 1 and 2 respond to every lane and group 3 barely responds. The untrained fly therefore mostly presses lanes 1-2, which lands about 40% of notes. That's a structural bias, not skill, and it's why the blocked-dopamine control sits at the same level.
 
 ## Known biological liberties
 
@@ -163,9 +163,9 @@ This comparison has caveats:
 **Data.** I wanted the male CNS connectome, but neuPrint needs an auth token, so I used the public FlyWire v783 files. The annotations have positions for all 139,248 neurons. Right-hemisphere neurons have the larger x values, so x is mirrored for a front view.
 
 **First activity probe** (one lane's visual neurons at 150 Hz for 240 ms):
-- About 20 visual neurons and 17–25 KCs fire. The code is sparse, and the APL fires a few spikes.
+- About 20 visual neurons and 17-25 KCs fire. The code is sparse, and the APL fires a few spikes.
 - **At the plain Shiu weights the MBONs were completely silent**, so nothing could learn.
-- A KC→MBON gain of 4 gave about 3 spikes per MBON in groups 1–2 but under 0.4 in group 3. I picked gain 8.
+- A KC→MBON gain of 4 gave about 3 spikes per MBON in groups 1-2 but under 0.4 in group 3. I picked gain 8.
 - The round-robin MBON grouping left group 3 nearly deaf to vision, because the visually driven KCs talk to a handful of MBONs. I kept the grouping rather than re-pick it after seeing the data; learning has to strengthen group 3's weak pathway.
 - Speed: about 0.45 s per 19.4 s song in Node, about 0.7 s in the browser.
 
@@ -182,7 +182,7 @@ This comparison has caveats:
 | 0.005 | About 40%, then 53% at episode 30. |
 | 0.002 | 28% rising to about 60%, still improving. |
 
-I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent B keeps pressing on 8–12 of the 16 rests, because it samples from a softmax.
+I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent B keeps pressing on 8-12 of the 16 rests, because it samples from a softmax.
 
 **Browser check.** Turbo looked stuck in one screenshot. Measured properly, it runs about 0.6 episodes per second; the screenshot had simply caught it right after a restart.
 

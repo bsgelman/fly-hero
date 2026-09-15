@@ -195,6 +195,7 @@ function drawLines(canvas, series, colors, maxX, dashes = []) {
 }
 
 // Line shade encodes the wiring, dashes encode the learner; magenta is the dopamine-blocked control.
+const NAMES = { 'A-real': 'Bio-RL, real wiring', 'A-shuffled': 'Bio-RL, shuffled wiring', 'A-random': 'Bio-RL, random network', 'A-dopamine-blocked': 'Bio-RL, dopamine blocked', 'B-real': 'Deep-RL, real wiring', 'B-shuffled': 'Deep-RL, shuffled wiring', 'B-random': 'Deep-RL, random network', 'B-real-150ep': 'Deep-RL, real wiring, 150 plays' };
 const SERIES = { 'A-real': ['ink', []], 'A-shuffled': ['graphite', []], 'A-random': ['faint', []], 'A-dopamine-blocked': ['magenta', []], 'B-real': ['ink', [5, 3]], 'B-shuffled': ['graphite', [5, 3]], 'B-random': ['faint', [5, 3]] };
 
 function drawCompare() {
@@ -209,9 +210,9 @@ function drawCompare() {
   });
   drawLines($('cmp'), means, names.map(n => C[SERIES[n][0]]), results.meta.episodes, names.map(n => SERIES[n][1]));
   const pct = (v) => `${Math.round(100 * v)}%`;
-  $('cmpTable').innerHTML = '<table><caption class="small">Mean hit rate over seeds. Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real, shuffled and random wiring; magenta is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before</th><th scope="col">Last 5</th><th scope="col">Unseen song</th></tr>' +
+  $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real wiring, shuffled wiring and random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before</th><th scope="col">Last 5</th><th scope="col">Unseen song</th></tr>' +
     Object.entries(results.conditions).map(([n, c]) =>
-      `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${SERIES[n] ? C[SERIES[n][0]] : 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
+      `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${SERIES[n] ? C[SERIES[n][0]] : 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${NAMES[n] || n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
     '</table>';
 }
 
@@ -223,6 +224,8 @@ function setMode(mode) {
   document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
   $('play').hidden = mode === 'compare';
   $('compare').hidden = mode !== 'compare';
+  $('brainCol').hidden = mode === 'compare'; // the fly pauses while the comparison is open
+  document.querySelector('main').classList.toggle('solo', mode === 'compare');
   $('humanBox').hidden = mode !== 'human';
   $('curveBox').hidden = mode === 'human';
   $('humanMsg').textContent = $('lastEvent').textContent = '';
@@ -252,7 +255,7 @@ function frame(now) {
     resultOf = (s) => h?.res[s];
     $('hud').textContent = h ? `You ${h.hits}, fly ${S.shadow.hits}, out of ${NOTES} notes` : `${NOTES} notes`;
     $('prog').value = Math.max(0, t / songMs(SONGS.train));
-  } else {
+  } else if (S.mode === 'watch') {
     advanceWatch(dt);
     ep = S.ep;
     t = ep.t;
@@ -261,8 +264,10 @@ function frame(now) {
     $('prog').value = ep.t / songMs(SONGS.train);
     drawLines($('curve'), [S.curve], [C.ink], Math.max(30, S.curve.length - 1));
   }
-  if (S.mode !== 'compare') drawGame(t, resultOf, S.mode === 'human' ? S.human?.press : null);
-  brain.frame(ep.net);
+  if (S.mode !== 'compare') {
+    drawGame(t, resultOf, S.mode === 'human' ? S.human?.press : null);
+    brain.frame(ep.net);
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

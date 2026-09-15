@@ -83,7 +83,7 @@ Times are relative to each slot's hit time t. At 1× speed, simulation time equa
 | t − 150 → t + 40 ms | decision window: MBON spikes are counted per action group |
 | t + 40 ms | the press registers: the group with the most spikes per neuron, if it reaches θ_press; otherwise wait |
 | t + 40 → t + 140 ms | reward phase: DANs are driven and plasticity is applied at the end |
-| — | the next slot's input starts at t + 200 |
+| - | the next slot's input starts at t + 200 |
 
 - **Humans** get a ±150 ms window on the same clock, so the fly's +40 ms press is inside the human window.
 - **Notes** fall for 1.6 s before reaching the hit line.
@@ -137,9 +137,9 @@ Conditions:
 | A-shuffled | A | shuffled | on |
 | A-random | A | random | on |
 | A-dopamine-blocked | A | real | blocked |
-| B-real | B | real | — |
-| B-shuffled | B | shuffled | — |
-| B-random | B | random | — |
+| B-real | B | real | - |
+| B-shuffled | B | shuffled | - |
+| B-random | B | random | - |
 
 Each condition runs 5 seeds × 30 training episodes on song A, then 1 frozen test episode on song B. Before training, each run also plays one frozen **before** episode, because episode 1 already includes 48 slots of within-episode learning.
 
@@ -193,7 +193,7 @@ README.md             how to run + lab notebook
 - Inhibitory weights lower v.
 - The shuffle preserves degrees and weight multisets.
 - Scoring: a press at +40 ms hits, a wrong lane is −1, a press on a rest is −0.5.
-- Agent A on the real wiring (seed 7) improves: the mean of episodes 8–10 is ≥25 points above the frozen before-episode, and plastic weights changed. This is a smoke test, not the headline.
+- Agent A on the real wiring (seed 7) improves: the mean of episodes 8-10 is ≥25 points above the frozen before-episode, and plastic weights changed. This is a smoke test, not the headline.
 
 The browser page is checked by loading it and confirming there are no console errors and the frames render.
 
@@ -203,7 +203,7 @@ Male CNS, compartment-specific dopamine, a real nerve-cord neuron model, PPO, ch
 
 ## 15. Revision after Ben's feedback (UI only)
 
-Ben found the first UI too busy and too obviously AI-made, and asked for something far more minimal. This replaces §10–§11. The simulation, agents, controls and experiments are unchanged.
+Ben found the first UI too busy and too obviously AI-made, and asked for something far more minimal. This replaces §10-§11. The simulation, agents, controls and experiments are unchanged.
 
 - **Page:** plain white page with default fonts and native buttons and selects. One `fly` menu covers the 7 conditions, a `speed` menu offers 0.5× / 1× / 4× / max, and a native `<progress>` shows song progress. No sound, no story strip.
 - **Game:** black note bars on white, 3 lane lines, a hit line and J K L labels. "fly" marks the fly's press.

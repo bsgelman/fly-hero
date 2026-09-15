@@ -108,7 +108,7 @@ Cast: 📊 Mary (analyst) · 🏗️ Winston (architect) · 💻 Amelia (dev) ·
 
 💻 **Amelia:** The fly's VPNs start firing 200 ms before the hit line. The decision window runs from −150 to +40 ms, and the press registers at +40 ms, inside the human window. Dopamine fires from +40 to +140, and eligibility decays with τ = 200 ms. Sim time equals game time at 1× speed.
 
-🎨 **Sally:** Difficulty: 48 slots, 25% rests, no chords. A human first-timer should land around 70–90%, so a fly at 90%+ is a real comparison.
+🎨 **Sally:** Difficulty: 48 slots, 25% rests, no chords. A human first-timer should land around 70-90%, so a fly at 90%+ is a real comparison.
 
 📋 **John:** Headline metric: note hit % in episode 1 → mean of the last 5 episodes, over 5 seeds, plus hit % on the unseen song with learning frozen. Episodes-to-80% as the efficiency number.
 

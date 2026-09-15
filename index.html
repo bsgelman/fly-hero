@@ -45,7 +45,6 @@
   progress::-webkit-progress-value { background: var(--ink); }
   progress::-moz-progress-bar { background: var(--ink); }
   kbd { font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--ink); border-radius: 2px; padding: 0 6px; }
-  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
   .legend { max-width: 68ch; margin-top: 24px; font-size: 15px; color: var(--graphite); }
   table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 14px; }
   caption { caption-side: bottom; text-align: left; padding-top: 8px; }
@@ -54,6 +53,17 @@
   td:first-child, th:first-child { text-align: left; padding-left: 0; }
   .swatch { display: inline-block; width: 16px; height: 0; border-top: 2px solid; margin-right: 8px; vertical-align: middle; }
   .gfp { color: var(--gfp); } .magenta { color: var(--magenta); }
+  /* compare mode: the brain is hidden, so the comparison takes the full width */
+  main.solo { grid-template-columns: 1fr; }
+  .cmp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+  @media (max-width: 760px) { .cmp-grid { grid-template-columns: 1fr; } }
+  #cmp { width: 100%; height: auto; }
+  .guide h2 { margin: 0 0 4px; font-size: 20px; }
+  .guide h3 { margin: 20px 0 0; font-size: 16px; }
+  .guide dl { margin: 0; }
+  .guide dt { margin-top: 10px; font-weight: 600; }
+  .guide dd { margin: 2px 0 0; max-width: 60ch; color: var(--graphite); }
+  .takeaway { margin-top: 24px; max-width: 60ch; }
   /* the result text flashes with the dopamine that fired, then fades back like the neuron flashes */
   .flash-gfp { font-weight: 600; animation: flash-gfp 900ms ease-out forwards; }
   .flash-magenta { font-weight: 600; animation: flash-magenta 900ms ease-out forwards; }
@@ -108,12 +118,47 @@
         </div>
       </div>
       <div id="compare" hidden>
-        <p class="small">Five seeds, 30 episodes each, from <code translate="no">node tools/run_experiments.mjs</code>. Episode 0 is a play before any learning.</p>
-        <canvas id="cmp" width="300" height="200" role="img" aria-label="Line chart of hit rate per episode for every learner; the table below lists the values"></canvas>
-        <div id="cmpTable"></div>
+        <p class="small">Each version of the fly played the same song 30 times, and each was run 5 separate times from scratch. The chart shows the average share of notes hit after every play; play 0 is before any learning.</p>
+        <div class="cmp-grid">
+          <div>
+            <canvas id="cmp" width="480" height="260" role="img" aria-label="Line chart of the average share of notes hit after each play, for every version of the fly; the table lists the values"></canvas>
+            <div id="cmpTable"></div>
+          </div>
+          <div class="guide">
+            <h2>What the options mean</h2>
+            <h3>How the fly learns</h3>
+            <dl>
+              <dt>Bio-RL</dt>
+              <dd>The simulated brain learns the way a real brain does. After each key press, a burst of the reward chemical dopamine strengthens the connections that led to a hit, and a punishment burst weakens the ones that led to a mistake.</dd>
+              <dt>Deep-RL</dt>
+              <dd>The brain stays frozen and never changes. A small, separate AI program watches the brain's output and learns which key to press. Most online "fly brain plays a game" demos work this way.</dd>
+            </dl>
+            <h3>How the brain is wired</h3>
+            <dl>
+              <dt>Real wiring</dt>
+              <dd>Connected exactly like a real fruit fly's brain, using a published map of its neurons.</dd>
+              <dt>Shuffled wiring</dt>
+              <dd>The same kinds of cells and the same number of connections, but who connects to whom is scrambled. This checks whether the fly's exact wiring matters.</dd>
+              <dt>Random network</dt>
+              <dd>The same number of neurons and connections, wired completely at random, so there is no brain-like structure at all.</dd>
+              <dt>Dopamine blocked</dt>
+              <dd>Bio-RL with its reward and punishment signal switched off. If it stops learning, dopamine is what does the learning.</dd>
+            </dl>
+            <h3>What the numbers mean</h3>
+            <dl>
+              <dt>Before</dt>
+              <dd>Share of notes hit on the first play, before any learning.</dd>
+              <dt>Last 5</dt>
+              <dd>Average share of notes hit over plays 26 to 30.</dd>
+              <dt>Unseen song</dt>
+              <dd>Share of notes hit on a new song it never practised, with learning switched off. A high score means it learned to read notes rather than memorise one song.</dd>
+            </dl>
+            <p class="takeaway">In short: the brain-style learner needed dopamine and brain-like structure to learn, but the fly's exact wiring made no difference in this test. It also beat the frozen-brain AI approach on the real and shuffled brains.</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div>
+    <div id="brainCol">
       <p id="brainHeader">&nbsp;</p>
       <canvas id="brain" width="480" height="655" role="img" aria-label="The fly's brain and nerve cord seen from above; simulated neurons flash when they spike"></canvas>
       <p id="lastEvent" class="small" style="margin-top:12px">&nbsp;</p>
