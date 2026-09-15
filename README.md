@@ -182,7 +182,7 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 
 **Browser check.** Turbo looked stuck in one screenshot. Measured properly, it runs about 0.6 episodes per second; the screenshot had simply caught it right after a restart.
 
-**UI simplified after feedback.** The first page was a dark, neon-style dashboard: WebGL glow, labeled brain regions, a schematic nerve cord, a story strip and sound. Ben found it too busy and too obviously AI-made. It's now a plain white page with native controls, a black-on-white game, and a grey-dot brain on a 2D canvas. An accessibility pass followed: AA text contrast, visible keyboard focus, labelled canvases, dashed lines for Deep-RL, and 44px touch targets. The simulation and experiments are unchanged.
+**UI simplified after feedback.** The first page was a dark, neon-style dashboard: WebGL glow, labeled brain regions, a schematic nerve cord, a story strip and sound. Ben found it too busy and too obviously AI-made. It's now a plain white page with native controls, a black-on-white game, and a grey-dot brain on a 2D canvas. An accessibility pass followed: AA text contrast, visible keyboard focus, labelled canvases, dashed lines for Deep-RL, and 44px touch targets. A final design pass gave it a microscopy look: ink on white, GFP green and magenta for reward and punishment dopamine (the colour-blind-safe pair microscopists use), one legible typeface, and a figure-legend paragraph under the brain. The simulation and experiments are unchanged.
 
 ## Sources
 

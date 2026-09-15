@@ -38,7 +38,7 @@ function onFlyEvents(ep) {
     const ev = ep.events[S.seen++], a = S.agent;
     if (ev.action !== WAIT) S.flyPress[ev.action] = ev.t;
     const dopamine = a.kind !== 'bio' ? '' : a.o.blocked ? ', dopamine blocked' : a.delta > 0 ? ', reward dopamine' : a.delta < 0 ? ', punishment dopamine' : '';
-    $('lastEvent').textContent = `saw ${ev.note < 0 ? 'nothing' : 'lane ' + (ev.note + 1)}, pressed ${ev.action === WAIT ? 'nothing' : 'lane ' + (ev.action + 1)}, reward ${ev.reward}${dopamine}`;
+    $('lastEvent').textContent = `Saw ${ev.note < 0 ? 'nothing' : 'lane ' + (ev.note + 1)}, pressed ${ev.action === WAIT ? 'nothing' : 'lane ' + (ev.action + 1)}, reward ${ev.reward}${dopamine}`;
   }
 }
 
@@ -100,20 +100,19 @@ addEventListener('keydown', (e) => {
 function drawGame(t, resultOf) {
   const c = $('game'), g = c.getContext('2d'), W = c.width, H = c.height, lw = W / 3, hitY = H - 40;
   g.clearRect(0, 0, W, H);
-  g.fillStyle = '#EAEAEA';
-  g.fillRect(lw, 0, 1, H);
-  g.fillRect(2 * lw, 0, 1, H);
-  g.fillStyle = '#111';
+  g.fillStyle = '#E3E6EA';
+  for (const x of [0, lw, 2 * lw, W - 1]) g.fillRect(Math.round(x), 0, 1, H);
+  g.fillStyle = '#1F2328';
   g.fillRect(0, hitY, W, 2);
   const notes = SONGS.train.notes;
   for (let s = 0; s < notes.length; s++) {
     const n = notes[s], d = hitTime(s) - t, res = resultOf(s);
     if (n < 0 || res === 'hit' || d > FALL_MS || d < -300) continue;
-    g.fillStyle = res ? '#D5D4D0' : '#2F3437';
+    g.fillStyle = res ? '#C9CED4' : '#1F2328';
     g.fillRect(n * lw + 15, hitY - (d / FALL_MS) * hitY - 6, lw - 30, 12);
   }
-  g.font = '12px "SF Mono", Menlo, Consolas, monospace';
-  g.fillStyle = '#6B6A67';
+  g.font = '13px "Atkinson Hyperlegible Next", system-ui, sans-serif';
+  g.fillStyle = '#5E6670';
   for (let l = 0; l < 3; l++) {
     g.fillText('JKL'[l], l * lw + lw / 2 - 4, H - 4);
     if (t - S.flyPress[l] < 150) g.fillText('fly', l * lw + lw / 2 - 8, hitY + 16);
@@ -123,13 +122,13 @@ function drawGame(t, resultOf) {
 function drawLines(canvas, series, colors, maxX, dashes = []) {
   const g = canvas.getContext('2d'), W = canvas.width, H = canvas.height, L = 30;
   g.clearRect(0, 0, W, H);
-  g.fillStyle = '#6B6A67';
-  g.font = '10px "SF Mono", Menlo, Consolas, monospace';
+  g.fillStyle = '#5E6670';
+  g.font = '11px "Atkinson Hyperlegible Next", system-ui, sans-serif';
   g.fillText('100%', 0, 12);
   g.fillText('0%', 12, H - 4);
   g.lineWidth = 1;
   g.setLineDash([]);
-  g.strokeStyle = '#EAEAEA';
+  g.strokeStyle = '#E3E6EA';
   g.strokeRect(L, 4, W - L - 2, H - 8);
   series.forEach((ys, k) => {
     g.strokeStyle = colors[k];
@@ -141,7 +140,7 @@ function drawLines(canvas, series, colors, maxX, dashes = []) {
   });
 }
 
-const COLORS = { 'A-real': '#111', 'A-shuffled': '#787774', 'A-random': '#C9C8C4', 'A-dopamine-blocked': '#9F2F2D', 'B-real': '#1F6C9F', 'B-shuffled': '#6BA4C9', 'B-random': '#B7D4E8' };
+const COLORS = { 'A-real': '#1F2328', 'A-shuffled': '#5E6670', 'A-random': '#C9CED4', 'A-dopamine-blocked': '#B0187A', 'B-real': '#1F5FA8', 'B-shuffled': '#5B8FCF', 'B-random': '#A9C4E6' };
 
 function drawCompare() {
   if (!results) {
@@ -193,16 +192,16 @@ function frame(now) {
     ep = S.shadow || S.ep;
     t = h ? now - h.t0 : -FALL_MS;
     resultOf = (s) => h?.res[s];
-    $('hud').textContent = h ? `you ${h.hits}, fly ${S.shadow.hits}, of ${NOTES} notes` : `${NOTES} notes`;
+    $('hud').textContent = h ? `You ${h.hits}, fly ${S.shadow.hits}, out of ${NOTES} notes` : `${NOTES} notes`;
     $('prog').value = Math.max(0, t / songMs(SONGS.train));
   } else {
     advanceWatch(dt);
     ep = S.ep;
     t = ep.t;
     resultOf = (s) => { const ev = ep.events[s]; return ev && (ev.action === ev.note ? 'hit' : 'miss'); };
-    $('hud').textContent = `episode ${S.epNo} · ${ep.hits} of ${ep.notes} notes hit`;
+    $('hud').textContent = `Episode ${S.epNo}: ${ep.hits} of ${ep.notes} notes hit`;
     $('prog').value = ep.t / songMs(SONGS.train);
-    drawLines($('curve'), [S.curve], ['#111'], Math.max(30, S.curve.length - 1));
+    drawLines($('curve'), [S.curve], ['#1F2328'], Math.max(30, S.curve.length - 1));
   }
   if (S.mode !== 'compare') drawGame(t, resultOf);
   brain.frame(ep.net);

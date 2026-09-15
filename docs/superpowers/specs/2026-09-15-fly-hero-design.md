@@ -218,3 +218,13 @@ Ben found the first UI too busy and too obviously AI-made, and asked for somethi
   - Deep-RL lines are dashed, so colour isn't the only cue, and the table has a caption.
   - Held or modified keys don't count as presses.
 - **Not changed:** the falling notes and spike flashes are the content, so they stay under reduced motion.
+
+## 16. Visual direction (frontend-design pass)
+
+The look is borrowed from fluorescence microscopy and the figures in a paper.
+
+- **Palette:** ink `#1F2328` on white paper, graphite `#5E6670` for secondary text, rule `#E3E6EA`. Reward dopamine is GFP green `#2E8540` and punishment dopamine is magenta `#B0187A`, the colour-blind-safe pair used in microscopy.
+- **Type:** one family, Atkinson Hyperlegible Next, with tabular figures. No monospace data labels.
+- **Controls:** text tabs underlined for the current mode; outlined buttons with a 2px radius.
+- **Layout:** the brain is the one bold element; no cards, no rounded canvases. A figure-legend paragraph explains the brain panel.
+- **Wording:** sentence case, which reverses the Title Case from the previous pass.

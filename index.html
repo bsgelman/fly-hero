@@ -3,56 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#FBFBFA">
+<meta name="theme-color" content="#FFFFFF">
 <title>Fly Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
 <style>
-  :root { --ink: #2F3437; --muted: #6B6A67; --line: #EAEAEA; --bg: #FBFBFA; --green: #346538; --red: #9F2F2D; --mono: "SF Mono", Menlo, Consolas, monospace; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Helvetica Neue", Helvetica, system-ui, sans-serif; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
-  .skip { position: absolute; left: 8px; top: -40px; background: #111; color: #fff; padding: 6px 12px; border-radius: 6px; }
+  /* Palette from fluorescence microscopy: ink on paper, GFP green for reward, magenta for punishment. */
+  :root { --paper: #FFFFFF; --ink: #1F2328; --graphite: #5E6670; --rule: #E3E6EA; --gfp: #2E8540; --magenta: #B0187A; --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--font); font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 72px; }
+  .skip { position: absolute; left: 8px; top: -48px; background: var(--ink); color: var(--paper); padding: 6px 12px; }
   .skip:focus-visible { top: 8px; }
-  h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; color: #111; text-wrap: balance; }
-  .lede { margin: 6px 0 32px; color: var(--muted); }
-  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-  label { color: var(--muted); font-size: 14px; }
-  button, select { font: inherit; font-size: 14px; color: #111; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; touch-action: manipulation; transition: border-color 150ms ease-out; }
-  button:hover, select:hover { border-color: #C9C8C4; }
-  :focus-visible { outline: 2px solid #111; outline-offset: 2px; }
-  @media (prefers-reduced-motion: no-preference) { button:active { transform: scale(0.98); } }
-  @media (pointer: coarse) { button, select { min-height: 44px; } }
-  .bar button[aria-pressed="true"] { background: #111; border-color: #111; color: #fff; }
-  main { display: grid; grid-template-columns: 300px 1fr; gap: 48px; margin-top: 32px; }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
-  canvas { display: block; max-width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+  h1 { margin: 0; font-size: 48px; font-weight: 700; line-height: 1; letter-spacing: -0.025em; }
+  .lede { margin: 12px 0 40px; max-width: 60ch; font-size: 18px; color: var(--graphite); }
   p { margin: 0 0 12px; }
-  .num, code { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
-  .muted { color: var(--muted); font-size: 13px; }
-  progress { display: block; width: 100%; height: 3px; margin: 0 0 12px; border: 0; appearance: none; background: var(--line); }
-  progress::-webkit-progress-bar { background: var(--line); }
-  progress::-webkit-progress-value { background: #111; }
-  progress::-moz-progress-bar { background: #111; }
-  kbd { font-family: var(--mono); font-size: 12px; background: #F7F6F3; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
-  table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px 28px; margin-bottom: 20px; }
+  .tabs button { font: inherit; font-size: 17px; color: var(--graphite); background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 0; cursor: pointer; touch-action: manipulation; }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-pressed="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
+  label { font-size: 15px; color: var(--graphite); }
+  select, .btn { font: inherit; font-size: 15px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); border-radius: 2px; padding: 5px 10px; cursor: pointer; touch-action: manipulation; }
+  select { margin-left: 6px; }
+  .btn:hover, select:hover { background: #F3F5F7; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  @media (pointer: coarse) { select, .btn, .tabs button { min-height: 44px; } }
+  main { display: grid; grid-template-columns: 300px 1fr; gap: 40px; margin-top: 40px; align-items: start; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } h1 { font-size: 38px; } }
+  canvas { display: block; max-width: 100%; height: auto; }
+  .small { font-size: 14px; color: var(--graphite); }
+  progress { display: block; width: 100%; height: 2px; margin: 0 0 16px; border: 0; appearance: none; background: var(--rule); }
+  progress::-webkit-progress-bar { background: var(--rule); }
+  progress::-webkit-progress-value { background: var(--ink); }
+  progress::-moz-progress-bar { background: var(--ink); }
+  kbd { font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--ink); border-radius: 2px; padding: 0 6px; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  .legend { max-width: 68ch; margin-top: 24px; font-size: 15px; color: var(--graphite); }
+  table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 14px; }
   caption { caption-side: bottom; text-align: left; padding-top: 8px; }
-  th { color: var(--muted); font-weight: 500; text-align: right; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; border-bottom: 1px solid var(--ink); }
   td, th { padding: 4px 0 4px 12px; text-align: right; }
   td:first-child, th:first-child { text-align: left; padding-left: 0; }
-  .swatch { display: inline-block; width: 14px; height: 0; border-top: 2px solid; margin: 0 8px 0 0; vertical-align: middle; }
-  .green { color: var(--green); } .red { color: var(--red); }
+  .swatch { display: inline-block; width: 16px; height: 0; border-top: 2px solid; margin-right: 8px; vertical-align: middle; }
+  .gfp { color: var(--gfp); } .magenta { color: var(--magenta); }
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to Game</a>
+<a class="skip" href="#main">Skip to the game</a>
 <div class="wrap">
   <h1>Fly Hero</h1>
   <p class="lede">A spiking model of a real fruit-fly brain learns a three-lane rhythm game by trial and error.</p>
 
-  <div class="bar" role="group" aria-label="Mode">
-    <button data-mode="watch" aria-pressed="true">Watch the Fly Learn</button>
-    <button data-mode="human" aria-pressed="false">You vs Fly</button>
-    <button data-mode="compare" aria-pressed="false">Compare Learners</button>
+  <div class="tabs" role="group" aria-label="Mode">
+    <button data-mode="watch" aria-pressed="true">Watch the fly learn</button>
+    <button data-mode="human" aria-pressed="false">You vs fly</button>
+    <button data-mode="compare" aria-pressed="false">Compare learners</button>
   </div>
-  <div class="bar">
+  <div class="controls">
     <label>Fly
       <select id="cond" name="fly">
         <option value="bio:real">Bio-RL, real wiring</option>
@@ -67,36 +75,36 @@
     <label>Speed
       <select id="speed" name="speed"><option value="1">1×</option><option value="4">4×</option><option value="max">Max</option></select>
     </label>
-    <button id="reset">New Fly</button>
+    <button id="reset" class="btn">New fly</button>
   </div>
 
   <main id="main">
     <div>
       <div id="play">
-        <p id="hud" class="num">Loading…</p>
+        <p id="hud">Loading…</p>
         <progress id="prog" max="1" value="0" aria-label="Song progress"></progress>
         <canvas id="game" width="300" height="420" role="img" aria-label="Three lanes with notes falling toward the hit line"></canvas>
         <div id="humanBox" hidden>
-          <p style="margin-top:16px">Press <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> as a note reaches the line. The fly plays the same song with learning frozen.</p>
-          <button id="humanStart">Start Song</button>
+          <p style="margin-top:20px">Press <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> as a note reaches the line. The fly plays the same song with learning frozen.</p>
+          <button id="humanStart" class="btn">Start song</button>
           <p id="humanMsg" style="margin-top:12px" aria-live="polite"></p>
         </div>
         <div id="curveBox">
-          <p class="muted" style="margin-top:24px">Hit rate per episode</p>
+          <p class="small" style="margin-top:28px">Hit rate per episode</p>
           <canvas id="curve" width="300" height="120" role="img" aria-label="Line chart of this fly's hit rate per episode"></canvas>
         </div>
       </div>
       <div id="compare" hidden>
-        <p class="muted">Five seeds, 30 episodes each, from <code translate="no">node tools/run_experiments.mjs</code>. Episode 0 is a play before any learning.</p>
+        <p class="small">Five seeds, 30 episodes each, from <code translate="no">node tools/run_experiments.mjs</code>. Episode 0 is a play before any learning.</p>
         <canvas id="cmp" width="300" height="200" role="img" aria-label="Line chart of hit rate per episode for every learner; the table below lists the values"></canvas>
         <div id="cmpTable"></div>
       </div>
     </div>
     <div>
-      <p id="brainHeader" class="num"></p>
-      <canvas id="brain" width="620" role="img" aria-label="Front view of the fly brain; simulated neurons flash when they spike"></canvas>
-      <p class="muted" style="margin-top:12px">Grey dots are all 139,248 FlyWire neurons, seen from the front. Flashes are simulated spikes, with <span class="green">reward</span> and <span class="red">punishment</span> dopamine in colour.</p>
-      <p id="lastEvent" class="num"></p>
+      <p id="brainHeader"></p>
+      <canvas id="brain" width="660" role="img" aria-label="Front view of the fly brain; simulated neurons flash when they spike"></canvas>
+      <p id="lastEvent" class="small" style="margin-top:12px"></p>
+      <p class="legend">Each grey dot is one of the 139,248 neurons in the FlyWire brain, seen from the front. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes dark as it spikes. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
     </div>
   </main>
 </div>

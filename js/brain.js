@@ -11,11 +11,11 @@ export class Brain {
     const g = bg.getContext('2d');
     g.fillStyle = '#fff';
     g.fillRect(0, 0, W, H);
-    g.fillStyle = 'rgba(47,52,55,0.05)';
+    g.fillStyle = 'rgba(31,35,40,0.055)';
     for (let k = 0; k < points.length; k += 2) g.fillRect((points[k] / 65535) * W, (points[k + 1] / 65535) * H, 1, 1);
     const n = sub.neurons;
     this.xy = n.x.map((x, i) => [x * W, n.y[i] * H]);
-    this.rgb = n.role.map(r => (r === 'pam' ? '52,101,56' : r === 'ppl1' ? '159,47,45' : '17,17,17'));
+    this.rgb = n.role.map(r => (r === 'pam' ? '46,133,64' : r === 'ppl1' ? '176,24,122' : '31,35,40'));
   }
 
   frame(net) {
