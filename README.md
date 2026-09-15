@@ -1,16 +1,16 @@
 # Fly Hero
 
-A spiking model built from a real fruit-fly connectome (FlyWire v783) learns a 3-lane rhythm game by trial and error. On the left is the game. On the right is the brain: all 139,248 neuron positions drawn as a point cloud, with the 3,371 simulated neurons flashing when they spike.
+A spiking model built from a real fruit-fly connectome (FlyWire v783) learns a 3-lane rhythm game by trial and error. On the left is the game. On the right is the brain: the cell bodies of 139,662 neurons in a fly's brain and nerve cord drawn as a point cloud, with the 3,371 simulated neurons flashing when they spike.
 
 Everything in the brain panel is a **simulation** (a leaky integrate-and-fire model), not recorded fly activity.
 
 ## Run it
 
 ```bash
-python -m http.server 8000
+python tools/serve.py
 ```
 
-Open http://localhost:8000. No build step, no dependencies: plain HTML, canvas and ES modules.
+Open http://localhost:8766. A plain `python -m http.server` also works, but browsers may then show an old copy after files change. No build step, no dependencies: plain HTML, canvas and ES modules.
 
 - **Watch the fly learn.** Episodes play back to back and the curve shows hit % per episode. One menu picks the fly: Agent A or B on real, shuffled or random wiring, or Agent A with dopamine blocked. Speeds are 1×, 4× and max.
 - **You vs fly.** Play the same song with J K L (±150 ms window). The fly plays alongside you with learning frozen.
@@ -25,10 +25,11 @@ node tools/run_experiments.mjs
 
 The tests take about 10 s. The experiments take about 12 min and rewrite `data/results.json`.
 
-To rebuild the data (Python with pandas and pyarrow), download two files into `data/raw/`:
+To rebuild the data (Python with pandas and pyarrow), download three files into `data/raw/`:
 
 - `Connectivity_783.parquet` from https://github.com/philshiu/Drosophila_brain_model
 - `supplemental_files/Supplemental_file1_neuron_annotations.tsv` from https://github.com/flyconnectome/flywire_annotations, saved as `annotations.tsv`
+- `body-annotations-male-cns-v1.0-minconf-0.5.feather` from https://storage.googleapis.com/flyem-male-cns/v1.0/connectome-data/flat-connectome/, saved as `mcns_annotations.feather`
 
 Then run:
 
@@ -54,7 +55,9 @@ Every connectome edge between these neurons is kept: **3,371 neurons, 233,686 co
 
 The neuron model is Shiu et al. 2024's LIF: v_rest −52 mV, threshold −45 mV, τ_m 20 ms, τ_syn 5 ms, 0.275 mV per synapse (signed by neurotransmitter), and 150 Hz Poisson input for driven neurons. This project runs it at **dt = 1 ms**, coarser than the original, with delay and refractory period rounded to 2 ms.
 
-The brain panel is a front view of `pos_x`/`pos_y` from the FlyWire annotations, drawn as grey dots on a plain 2D canvas. Only simulated neurons ever flash: black for spikes, green for reward dopamine (PAM), red for punishment dopamine (PPL1). FlyWire v783 covers the brain only, so no nerve cord is drawn.
+The brain panel shows the cell bodies of 139,662 neurons from the Janelia male CNS, a fly whose brain and nerve cord were imaged together. It is seen from above with the head at the top, so the nerve cord runs down the page, as it runs back along a real fly's body. FlyWire covers the brain only, which is why the drawing uses the male CNS.
+
+The simulated neurons come from FlyWire. Each is drawn at the cell body of a male CNS neuron of the same type, on the same side where possible; 26 of the 3,371 have no matching type and aren't drawn. Only simulated neurons ever flash, in the ink colour, with green for reward dopamine (PAM) and magenta for punishment dopamine (PPL1).
 
 ## The RL problem, stated honestly
 
@@ -153,6 +156,7 @@ This comparison has caveats:
 4. **Winner-take-all.** The action readout over 3 MBON groups is a modeling choice. The groups are dealt round-robin by KC input, fixed before any results were seen.
 5. **KC→MBON gain of 8.** Without it the MBONs never fire from visual input (see the lab notebook).
 6. **Visual input.** Lanes are mapped onto real visual projection neurons that synapse onto KCs. That visual input is a small minority of what the mushroom body receives (about 6.5k synapses versus about 427k from central neurons, mostly olfactory).
+7. **Drawing positions come from a different fly.** Simulated FlyWire neurons (female brain) are drawn at the cell bodies of same-type neurons in the Janelia male CNS, so flash positions are approximate, and they mark cell bodies rather than the synapse-dense regions where neurons connect.
 
 ## Lab notebook
 
@@ -182,6 +186,8 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 
 **Browser check.** Turbo looked stuck in one screenshot. Measured properly, it runs about 0.6 episodes per second; the screenshot had simply caught it right after a restart.
 
+**Nerve cord added.** Ben couldn't find a brain stem. Flies don't have one; the equivalent is the neck connective and the ventral nerve cord, and FlyWire's brain-only data leaves them out. The Janelia male CNS annotations are public, carry a soma position for each neuron, and include FlyWire cell types, so the brain panel now draws that fly's whole CNS from above. 3,345 of the 3,371 simulated neurons are placed at a cell of the same type.
+
 **UI simplified after feedback.** The first page was a dark, neon-style dashboard: WebGL glow, labeled brain regions, a schematic nerve cord, a story strip and sound. Ben found it too busy and too obviously AI-made. It's now a plain white page with native controls, a black-on-white game, and a grey-dot brain on a 2D canvas. An accessibility pass followed: AA text contrast, visible keyboard focus, labelled canvases, dashed lines for Deep-RL, and 44px touch targets. A final design pass gave it a microscopy look: ink on white, GFP green and magenta for reward and punishment dopamine (the colour-blind-safe pair microscopists use), one legible typeface, and a figure-legend paragraph under the brain. The last cleanup pass:
 
 - **Font is self-hosted.** The page no longer needs the internet.
@@ -194,6 +200,7 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 - Dorkenwald et al. 2024, *Neuronal wiring diagram of an adult brain*, Nature. FlyWire connectome.
 - Schlegel et al. 2024, *Whole-brain annotation and multi-connectome cell typing of Drosophila*, Nature. Matsliah et al. 2024, Nature, and Berg et al. 2025, bioRxiv. Annotations and positions (github.com/flyconnectome/flywire_annotations).
 - Shiu et al. 2024, *A Drosophila computational brain model reveals sensorimotor processing*, Nature. LIF model and edge list (github.com/philshiu/Drosophila_brain_model).
+- Berg et al. 2025, *Sexual dimorphism in the complete connectome of the Drosophila male central nervous system*, bioRxiv. Janelia male CNS v1.0 (CC-BY), soma positions for the brain panel.
 - Bennett, Philippides & Nowotny 2021, *Learning with reinforcement prediction errors in a model of the Drosophila mushroom body*, Nature Communications.
 - Caron, Ruta, Abbott & Axel 2013, *Random convergence of olfactory inputs in the Drosophila mushroom body*, Nature.
 - The other fly-brain demos in the brief (Beat Saber fly, FlyPong, fly-tictactoe, Flappy Fly, Wordle fly) are described from the project brief and were not independently checked here.

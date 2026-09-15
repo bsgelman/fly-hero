@@ -238,3 +238,11 @@ The look is borrowed from fluorescence microscopy and the figures in a paper.
 - **No layout shift.** The brain canvas has fixed dimensions (660×317).
 - **Press feedback.** Buttons move down 1px when pressed, unless reduced motion is on.
 - **Copy fixes.** The status line reads as a sentence, and counts use singular or plural correctly.
+
+## 18. Brain panel shows the whole CNS (after Ben's anatomy feedback)
+
+- **Why.** Flies have no brain stem. The closest equivalent is the neck connective and ventral nerve cord, which FlyWire v783 leaves out.
+- **Point cloud.** Soma locations from the public Janelia male CNS v1.0 annotations: 139,662 neurons, glia excluded, seen from above (x across the body, z along it, head at the top).
+- **Simulated neurons.** Placed at the soma of a same-type male CNS neuron (`flywireType`, same side when possible), assigned in bodyId order. 26 have no match and aren't drawn. The connectome, simulation and results are unchanged.
+- **Lanes.** Red, blue and green, tuned for contrast in light and dark mode.
+- **Local server.** `tools/serve.py` (port 8766, `Cache-Control: no-store`), so browsers never show stale files.

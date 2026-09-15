@@ -27,7 +27,7 @@ export class Brain {
     for (let i = 0; i < this.xy.length; i++) {
       const age = t - ls[i];
       if (age < 10) spiking++;
-      if (age > 600) continue;
+      if (age > 600 || this.xy[i][0] < 0) continue; // negative x: no matching cell type to draw at
       g.fillStyle = `rgba(${this.rgb[i]},${Math.exp(-age / 200)})`;
       g.fillRect(this.xy[i][0] - 1.5, this.xy[i][1] - 1.5, 3, 3);
     }
