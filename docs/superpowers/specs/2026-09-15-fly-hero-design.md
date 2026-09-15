@@ -119,6 +119,7 @@ How this avoids FlyPong's failure: the RPE saturates, eligibility is limited to 
 - **Features.** f = log(1 + DN spike counts) in the decision window.
 - **Policy.** softmax(W f + b) over the 4 actions.
 - **Learning.** REINFORCE with a running-mean reward baseline, one update per slot. There is no multi-step credit, so PPO is unnecessary. It runs in JS on the same simulator.
+- **Learning rate.** 0.002, chosen from a seed-1 sweep over {0.1, 0.01, 0.005, 0.002} (README lab notebook).
 
 ## 9. Controls and experiment
 
@@ -140,7 +141,9 @@ Conditions:
 | B-shuffled | B | shuffled | — |
 | B-random | B | random | — |
 
-Each condition runs 5 seeds × 30 training episodes on song A, then 1 frozen test episode on song B.
+Each condition runs 5 seeds × 30 training episodes on song A, then 1 frozen test episode on song B. Before training, each run also plays one frozen **before** episode, because episode 1 already includes 48 slots of within-episode learning.
+
+Fairness check: **B-real-150ep** gives Deep-RL 5× the training budget (150 episodes, 3 seeds).
 
 **Metrics:**
 - Note hit % per episode (hits / notes).
@@ -190,7 +193,7 @@ README.md             how to run + lab notebook
 - Inhibitory weights lower v.
 - The shuffle preserves degrees and weight multisets.
 - Scoring: a press at +40 ms hits, a wrong lane is −1, a press on a rest is −0.5.
-- Agent A on the real wiring improves over 10 episodes. This is a smoke test, not the headline.
+- Agent A on the real wiring (seed 7) improves: the mean of episodes 8–10 is ≥25 points above the frozen before-episode, and plastic weights changed. This is a smoke test, not the headline.
 
 The browser page is checked by loading it and confirming there are no console errors and the frames render.
 
