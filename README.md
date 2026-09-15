@@ -1,6 +1,6 @@
 # Fly Hero
 
-A spiking model of a real fruit fly brain learns a three-lane rhythm game by trial and error. The learning happens inside the simulated brain: dopamine strengthens the synapses that led to a hit and weakens the ones that led to a mistake.
+A spiking model of a real fruit fly brain learns a three-lane rhythm game, in the style of Guitar Hero, by trial and error. The learning happens inside the simulated brain: dopamine strengthens the synapses that led to a hit and weakens the ones that led to a mistake.
 
 **Live demo: [bsgelman.github.io/fly-hero](https://bsgelman.github.io/fly-hero/)**
 
