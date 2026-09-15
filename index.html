@@ -50,6 +50,9 @@
   th { font-weight: 600; border-bottom: 1px solid var(--ink); }
   td, th { padding: 4px 0 4px 12px; text-align: right; }
   td:first-child, th:first-child { text-align: left; padding-left: 0; }
+  td:first-child { white-space: nowrap; } /* fly names stay on one line */
+  .cmp-grid > div { min-width: 0; }
+  #cmpTable { overflow-x: auto; } /* on a phone the table scrolls sideways instead of the page */
   .swatch { display: inline-block; width: 16px; height: 0; border-top: 2px solid; margin-right: 8px; vertical-align: middle; }
   .gfp { color: var(--gfp); } .magenta { color: var(--magenta); }
   /* compare mode: the brain is hidden, so the comparison takes the full width */
@@ -176,7 +179,7 @@
   <footer class="credits">
     <h2>Based on published research</h2>
     <ul>
-      <li>Brain wiring, cell types and drawing: the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., <a href="https://doi.org/10.1101/2025.10.09.680999">bioRxiv 2025</a>.</li>
+      <li>Brain wiring, cell types and drawing: the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., <a href="https://doi.org/10.1016/j.cell.2026.08.015">Cell 2026</a>.</li>
       <li>Neuron model: Shiu et al., <a href="https://doi.org/10.1038/s41586-024-07763-9">Nature 2024</a>.</li>
       <li>Dopamine learning rule: inspired by Bennett, Philippides and Nowotny, <a href="https://doi.org/10.1038/s41467-021-22592-4">Nature Communications 2021</a>.</li>
     </ul>

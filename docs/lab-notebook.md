@@ -211,6 +211,6 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 - Dorkenwald et al. 2024, *Neuronal wiring diagram of an adult brain*, Nature. FlyWire connectome.
 - Schlegel et al. 2024, *Whole-brain annotation and multi-connectome cell typing of Drosophila*, Nature. Matsliah et al. 2024, Nature, and Berg et al. 2025, bioRxiv. Annotations and positions (github.com/flyconnectome/flywire_annotations).
 - Shiu et al. 2024, *A Drosophila computational brain model reveals sensorimotor processing*, Nature. LIF model and edge list (github.com/philshiu/Drosophila_brain_model).
-- Berg et al. 2025, *Sexual dimorphism in the complete connectome of the Drosophila male central nervous system*, bioRxiv. Janelia male CNS v1.0 (CC-BY), soma positions for the brain panel.
+- Berg et al. 2026, *Sexual dimorphism in the complete Drosophila male central nervous system connectome*, Cell 189, 5504-5526 (doi:10.1016/j.cell.2026.08.015; preprint bioRxiv 2025). Janelia male CNS v1.0 (CC-BY), soma positions for the brain panel.
 - Bennett, Philippides & Nowotny 2021, *Learning with reinforcement prediction errors in a model of the Drosophila mushroom body*, Nature Communications.
 - Caron, Ruta, Abbott & Axel 2013, *Random convergence of olfactory inputs in the Drosophila mushroom body*, Nature.
