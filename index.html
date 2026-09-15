@@ -120,7 +120,7 @@
         </div>
       </div>
       <div id="compare" hidden>
-        <p class="lead-in">Every version of the fly practised for <strong>30 songs</strong>: the same song played 30 times in a row, starting from zero. That was repeated 5 times. The chart shows the share of notes hit after each song, averaged over the 5 repeats. Song 0 is before any practice.</p>
+        <p class="lead-in">Each fly practised for <strong>30 songs</strong> (the same song 30 times), starting untrained. Results are averaged over 5 repeats; song 0 is before practice.</p>
         <div class="cmp-grid">
           <div>
             <canvas id="cmp" width="480" height="260" role="img" aria-label="Line chart of the average share of notes hit after each play, for every version of the fly; the table lists the values"></canvas>
@@ -131,33 +131,33 @@
             <h3>How the fly learns</h3>
             <dl>
               <dt>Bio-RL</dt>
-              <dd>The simulated brain learns the way a real brain does. After each key press, a burst of the reward chemical dopamine strengthens the connections that led to a hit, and a punishment burst weakens the ones that led to a mistake.</dd>
+              <dd>The brain adjusts its own connections. Dopamine strengthens them after a hit and weakens them after a mistake.</dd>
               <dt>Deep-RL</dt>
-              <dd>The brain stays frozen and never changes. A small, separate AI program watches the brain's output and learns which key to press.</dd>
+              <dd>The brain stays fixed. A separate AI program learns which key to press from the brain's output.</dd>
             </dl>
             <h3>How the brain is wired</h3>
             <dl>
               <dt>Real wiring</dt>
-              <dd>Both the brain's layout and every individual connection match a real fruit fly, from a published map of its neurons.</dd>
+              <dd>Copied from a map of a real fruit fly's brain.</dd>
               <dt>Shuffled wiring</dt>
-              <dd>The layout is kept, but the individual connections are scrambled. Eye cells still connect to memory cells, and memory cells still connect to output cells, but which particular cell links to which is random. This tests whether the exact connections matter, or only the layout.</dd>
+              <dd>Signals still flow eyes to memory to output, but each cell's partners are picked at random. Tests whether exact connections matter.</dd>
               <dt>Random network</dt>
-              <dd>The layout is gone too. Any cell can connect to any other, so signals no longer reliably travel from the eyes to memory to output. This tests whether the brain's layout matters at all. Think of a company: shuffled wiring keeps every department handing work to the same next department but changes which person hands it to which, while a random network lets anyone hand work to anyone, so jobs rarely make it from start to finish.</dd>
+              <dd>Any cell can connect to any other, with no eyes to memory to output path. Tests whether brain structure matters.</dd>
               <dt>Dopamine blocked</dt>
-              <dd>Bio-RL with its reward and punishment signal switched off. If it stops learning, dopamine is what does the learning.</dd>
+              <dd>Bio-RL with dopamine switched off. Tests whether dopamine drives the learning.</dd>
             </dl>
             <h3>Deep-RL, real wiring, 150 songs</h3>
-            <p class="note">An extra check to be fair to Deep-RL. It learns slowly, so this version got five times the practice: 150 songs instead of 30, repeated 3 times. It still only reached 75% (68% on the new song), well below the 96% Bio-RL reached after just 30 songs. For this row, End of practice means songs 146 to 150, and it has no line on the chart because the chart stops at song 30.</p>
+            <p class="note">Deep-RL given 150 songs of practice instead of 30, to see if it just needed more time. It reached 75%, still below Bio-RL's 96%.</p>
             <h3>What the numbers mean</h3>
             <dl>
               <dt>Before practice</dt>
-              <dd>Share of notes hit before any practice.</dd>
+              <dd>Notes hit before any practice.</dd>
               <dt>End of practice</dt>
-              <dd>Average share of notes hit over its last 5 songs (songs 26 to 30).</dd>
+              <dd>Average of the last 5 practice songs.</dd>
               <dt>New song</dt>
-              <dd>After practice, the share of notes hit on a song it never heard, with learning switched off. A high score means it learned to read notes rather than memorise one song.</dd>
+              <dd>Notes hit on a song it never practised, with learning off.</dd>
             </dl>
-            <p class="takeaway">In short: the brain-style learner needed dopamine and the brain's layout to learn, but the fly's exact connections made no difference in this test. It also beat the frozen-brain AI approach on the real and shuffled brains.</p>
+            <p class="takeaway">In short: learning needed dopamine and brain structure, but not the fly's exact connections. Bio-RL also beat Deep-RL on real and shuffled wiring.</p>
           </div>
         </div>
       </div>
