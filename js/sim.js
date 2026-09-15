@@ -1,5 +1,6 @@
-// Leaky integrate-and-fire network on a FlyWire subgraph.
-// Parameters from Shiu et al. 2024 (github.com/philshiu/Drosophila_brain_model), dt = 1 ms.
+// Leaky integrate-and-fire network, 1 ms steps: the browser port of flyhero/sim.py, the reference model.
+// Parameters from Shiu et al. 2024 (github.com/philshiu/Drosophila_brain_model). Float64 and the same random numbers
+// as the Python, so both give identical spikes (python -m flyhero.test checks).
 
 export const P = {
   v0: -52, vth: -45, tauM: 20, tauS: 5, refrMs: 2, delayMs: 2,
@@ -28,7 +29,7 @@ function shuffleInPlace(a, rand) {
 export function wiring(sub, variant = 'real', seed = 1) {
   const pre = Int32Array.from(sub.edges.pre);
   const post = Int32Array.from(sub.edges.post);
-  const w = Float32Array.from(sub.edges.w);
+  const w = Float64Array.from(sub.edges.w);
   const rand = rng(seed * 7919 + 13);
   const role = sub.neurons.role;
   if (variant === 'shuffled') {
@@ -82,8 +83,8 @@ export class Network {
     for (let i = 0; i < N; i++) rowStart[i + 1] += rowStart[i];
     const fill = rowStart.slice(0, N);
     this.col = new Int32Array(E);
-    this.w = new Float32Array(E);
-    this.m = new Float32Array(E).fill(1);
+    this.w = new Float64Array(E);
+    this.m = new Float64Array(E).fill(1);
     const plastic = [[], [], []];
     for (let e = 0; e < E; e++) {
       const i = edges.pre[e], j = edges.post[e], k = fill[i]++;
@@ -95,19 +96,18 @@ export class Network {
     this.plastic = plastic.map(a => Int32Array.from(a));
     this.plasticPre = this.plastic.map(ids => ids.map(k => this.preOfEdge(k)));
 
-    this.v = new Float32Array(N);
-    this.g = new Float32Array(N);
+    this.v = new Float64Array(N);
+    this.g = new Float64Array(N);
     this.refr = new Uint8Array(N);
-    this.trace = new Float32Array(N);      // spike trace, tau = traceTau
+    this.trace = new Float64Array(N);      // spike trace, tau = 200 ms
     this.count = new Uint16Array(N);       // spikes since resetCounts()
     this.lastSpike = new Float64Array(N);
-    this.ring = [0, 1, 2].map(() => new Float32Array(N));
-    this.drive = new Float32Array(N);      // Hz, Shiu-style suprathreshold Poisson kicks on v
-    this.noise = new Float32Array(N);      // Hz, subthreshold kicks on g
-    this.noiseKick = new Float32Array(N);
+    this.ring = [0, 1, 2].map(() => new Float64Array(N));
+    this.drive = new Float64Array(N);      // Hz, Shiu-style suprathreshold Poisson kicks on v
+    this.noise = new Float64Array(N);      // Hz, subthreshold kicks on g
+    this.noiseKick = new Float64Array(N);
     this.spikes = new Int32Array(N);
     this.nSpikes = 0;
-    this.traceTau = 200;
     this.resetState();
   }
 
@@ -134,7 +134,7 @@ export class Network {
   step() {
     const { N, v, g, refr, trace, drive, noise, noiseKick, rand, spikes } = this;
     const inbox = this.ring[this.t % 3];
-    const dm = 1 / P.tauM, dg = Math.exp(-1 / P.tauS), dtr = Math.exp(-1 / this.traceTau);
+    const dm = 1 / P.tauM, dg = 0.8187307530779818, dtr = 0.9950124791926823; // exp(-1/5), exp(-1/200) written out so JS and Python match bit for bit
     let n = 0;
     for (let i = 0; i < N; i++) {
       g[i] += inbox[i]; inbox[i] = 0;

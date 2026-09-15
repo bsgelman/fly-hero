@@ -1,4 +1,4 @@
-// Songs, rewards and the millisecond-level episode runner shared by the page and Node experiments.
+// Songs, rewards and the millisecond-level episode runner: the browser port of flyhero/game.py.
 import { rng } from './sim.js';
 
 export const SLOT_MS = 400, LEAD_MS = 200, SLOTS = 48;

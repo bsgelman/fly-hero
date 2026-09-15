@@ -1,10 +1,48 @@
-A-real               before  31.9  ep1  61.9  last5  99.6 ± 0.3  test 100.0 ± 0.0  to80 [4,5,5,3,3]  falsePresses(last) 0.0 (187s)
-A-shuffled           before  21.9  ep1  21.9  last5  21.9 ± 0.0  test  26.7 ± 1.3  to80 [null,null,null,null,null]  falsePresses(last) 15.0 (231s)
-A-random             before  15.0  ep1  21.9  last5  26.3 ±14.3  test  25.6 ±13.3  to80 [null,null,null,null,null]  falsePresses(last) 0.0 (132s)
-A-dopamine-blocked   before  30.0  ep1  32.5  last5  35.3 ± 2.5  test  37.9 ± 5.5  to80 [null,null,null,null,null]  falsePresses(last) 0.0 (145s)
-B-real               before  23.1  ep1  49.4  last5  98.9 ± 0.8  test  97.9 ± 2.5  to80 [5,4,4,4,4]  falsePresses(last) 0.4 (142s)
-B-shuffled           before  23.1  ep1  29.4  last5  80.0 ±11.6  test  72.8 ± 6.2  to80 [null,null,19,null,6]  falsePresses(last) 6.0 (225s)
-B-random             before  23.1  ep1  78.1  last5 100.0 ± 0.0  test 100.0 ± 0.0  to80 [3,3,3,3,3]  falsePresses(last) 0.0 (69s)
-B-real-150ep         before  21.9  ep1  46.9  last5  99.8 ± 0.3  test  97.4 ± 2.1  to80 [5,4,4]  falsePresses(last) 0.3 (369s)
+1/38 runs done (444s)
+2/38 runs done (532s)
+3/38 runs done (698s)
+4/38 runs done (758s)
+5/38 runs done (760s)
+6/38 runs done (845s)
+7/38 runs done (849s)
+8/38 runs done (852s)
+9/38 runs done (859s)
+10/38 runs done (1213s)
+11/38 runs done (1227s)
+12/38 runs done (1386s)
+13/38 runs done (1438s)
+14/38 runs done (1439s)
+15/38 runs done (1513s)
+16/38 runs done (1648s)
+17/38 runs done (1680s)
+18/38 runs done (1785s)
+19/38 runs done (1797s)
+20/38 runs done (1797s)
+21/38 runs done (1799s)
+22/38 runs done (1801s)
+23/38 runs done (1807s)
+24/38 runs done (1983s)
+25/38 runs done (2042s)
+26/38 runs done (2046s)
+27/38 runs done (2122s)
+28/38 runs done (2285s)
+29/38 runs done (2364s)
+30/38 runs done (2405s)
+31/38 runs done (2468s)
+32/38 runs done (2524s)
+33/38 runs done (2604s)
+34/38 runs done (2655s)
+35/38 runs done (2712s)
+36/38 runs done (3212s)
+37/38 runs done (3214s)
+38/38 runs done (3218s)
+A-real               before  33.1  ep1  61.9  last5  99.3 ± 0.5  test 100.0 ± 0.0  to80 [4, 3, 4, 3, 3]  falsePresses(last) 0.0
+A-shuffled           before  21.9  ep1  21.9  last5  21.9 ± 0.0  test  27.2 ± 1.3  to80 [None, None, None, None, None]  falsePresses(last) 15.0
+A-random             before  15.0  ep1  23.1  last5  25.9 ±14.2  test  26.2 ±13.7  to80 [None, None, None, None, None]  falsePresses(last) 0.0
+A-dopamine-blocked   before  31.9  ep1  36.3  last5  33.3 ± 2.6  test  35.9 ± 5.4  to80 [None, None, None, None, None]  falsePresses(last) 0.0
+B-real               before  23.1  ep1  50.6  last5  99.0 ± 0.6  test  97.4 ± 1.6  to80 [5, 4, 4, 4, 5]  falsePresses(last) 0.6
+B-shuffled           before  23.1  ep1  30.6  last5  82.8 ±11.6  test  75.9 ±15.9  to80 [10, None, 11, 29, 6]  falsePresses(last) 9.6
+B-random             before  23.1  ep1  78.1  last5 100.0 ± 0.0  test 100.0 ± 0.0  to80 [3, 3, 3, 3, 3]  falsePresses(last) 0.0
+B-real-150ep         before  21.9  ep1  47.9  last5  98.5 ± 1.6  test  95.7 ± 1.2  to80 [5, 4, 4]  falsePresses(last) 0.0
 
 wrote data/results.json

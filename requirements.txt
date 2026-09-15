@@ -1,0 +1,4 @@
+numpy>=2.0
+# only for tools/extract_subgraph.py, which rebuilds the network from the raw connectome
+pandas
+pyarrow

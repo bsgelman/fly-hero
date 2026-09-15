@@ -14,7 +14,7 @@ try {
   throw err;
 }
 const results = await fetch('data/results.json').then(r => (r.ok ? r.json() : null)).catch(() => null);
-const trained = await fetch('data/trained_fly.bin').then(r => (r.ok ? r.arrayBuffer() : null)).catch(() => null); // from tools/train_fly.mjs
+const trained = await fetch('data/trained_fly.bin').then(r => (r.ok ? r.arrayBuffer() : null)).catch(() => null); // from python -m flyhero.train_fly
 const points = new Uint16Array(pointsBuf);
 
 // Colour tokens live in CSS so the canvases match the page.
@@ -81,9 +81,9 @@ function advanceWatch(dt) {
 function practisedFly() {
   const net = new Network(sub, wiring(sub, 'real', 1), { seed: 1, kcMbonGain: BIO_DEFAULTS.kcMbonGain });
   const edges = net.plastic.flatMap(ids => [...ids]);
-  const ok = trained && trained.byteLength === 4 * edges.length; // ignore a stale file from a different network
+  const ok = trained && trained.byteLength === 8 * edges.length; // ignore a stale file from a different network
   if (ok) {
-    const learned = new Float32Array(trained);
+    const learned = new Float64Array(trained);
     edges.forEach((k, i) => { net.m[k] = learned[i]; });
   }
   return { net, agent: new BioRL(net, { seed: 1 }), practised: ok };
@@ -211,7 +211,7 @@ const SERIES = { 'A-real': ['ink', []], 'A-shuffled': ['graphite', []], 'A-rando
 
 function drawCompare() {
   if (!results) {
-    $('cmpTable').textContent = 'No data/results.json yet. Run: node tools/run_experiments.mjs';
+    $('cmpTable').textContent = 'No data/results.json yet. Run: python -m flyhero.run_experiments';
     return;
   }
   const names = Object.keys(SERIES).filter(n => results.conditions[n]);

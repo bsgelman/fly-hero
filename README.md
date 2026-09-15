@@ -4,7 +4,7 @@ A spiking model of a real fruit fly brain learns a three-lane rhythm game by tri
 
 **Live demo: [bsgelman.github.io/fly-hero](https://bsgelman.github.io/fly-hero/)**
 
-**32% of notes hit before practice, 99.6% after 30 songs, and 100% on a song it never heard.** With its dopamine neurons blocked, it stays at 35%.
+**33% of notes hit before practice, 99.3% after 30 songs, and 100% on a song it never heard.** With its dopamine neurons blocked, it stays at 33%.
 
 ![Fly Hero: the game on the left, the simulated brain and nerve cord on the right](docs/images/watch.png)
 
@@ -16,25 +16,26 @@ The simulation has 6,900 neurons (3,275 in the brain and 3,625 in the nerve cord
 Janelia/Google male CNS connectome (public data)
    │
    ▼  extract_subgraph.py   connectome  →  6,900 neurons, 6,419,481 synapses
-   ▼  sim.js                synapses    →  spiking neurons, 1 ms steps
-   ▼  game.js               notes       →  the eye neurons for that lane fire
-   ▼  agents.js             spikes      →  key press, reward, dopamine, synapse update
-   ▼  app.js, brain.js      state       →  game, brain view and charts in the browser
+   ▼  flyhero/sim.py        synapses    →  spiking neurons, 1 ms steps (NumPy)
+   ▼  flyhero/game.py       notes       →  the eye neurons for that lane fire
+   ▼  flyhero/agents.py     spikes      →  key press, reward, dopamine, synapse update
+   ▼  js/                   same model  →  runs live in the browser: game, brain view and charts
 ```
 
 | File | Lines | Job |
 |---|--:|---|
 | `tools/extract_subgraph.py` | 126 | Picks the eye, memory, dopamine, output and nerve cord neurons from the male CNS and writes the network |
-| `js/sim.js` | 162 | Leaky integrate-and-fire neurons on the real synapse list, plus the shuffled and random wiring controls |
-| `js/game.js` | 62 | Songs, rewards and a millisecond-level game loop |
-| `js/agents.js` | 102 | Bio-RL (dopamine learning inside the brain) and Deep-RL (a trained readout) |
+| `flyhero/sim.py` | 170 | Leaky integrate-and-fire neurons on the real synapse list, plus the shuffled and random wiring controls |
+| `flyhero/game.py` | 87 | Songs, rewards and a millisecond-level game loop |
+| `flyhero/agents.py` | 105 | Bio-RL (dopamine learning inside the brain) and Deep-RL (a readout trained with REINFORCE) |
+| `flyhero/run_experiments.py` | 88 | Runs every learner and control in parallel and writes `data/results.json` |
+| `flyhero/train_fly.py` | 30 | Trains the fly you play against |
+| `flyhero/test.py` | 106 | Checks the neuron model, wiring controls, rewards and learning, and that the browser version matches |
+| `js/sim.js`, `js/game.js`, `js/agents.js` | 327 | The same model ported line for line, so it runs live in the browser |
 | `js/app.js` | 285 | The page: watch the fly learn, you vs fly, compare learners |
 | `js/brain.js` | 53 | Brain and nerve cord drawing |
-| `tools/run_experiments.mjs` | 68 | Runs every learner and control and writes `data/results.json` |
-| `tools/train_fly.mjs` | 23 | Trains the fly you play against |
-| `tools/test.mjs` | 69 | Checks for the neuron model, wiring controls, rewards and learning |
 
-No frameworks, no build step and no npm packages. The same modules run in Node for the experiments and in the browser for the page.
+The model is Python with NumPy as its only dependency. Browsers can't run it live, so the page runs a JavaScript port with no frameworks or build step. Both use float64 and the same random number generator, and `flyhero/test.py` checks that they produce identical spikes and key presses from the same seed.
 
 ## Results
 
@@ -42,21 +43,21 @@ Each learner practised for 30 songs (the same song 30 times), repeated 5 times f
 
 | Learner | Before practice | End of practice | New song |
 |---|--:|--:|--:|
-| **Bio-RL, real wiring** | 31.9% | **99.6%** | **100.0%** |
-| Bio-RL, shuffled wiring | 21.9% | 21.9% | 26.7% |
-| Bio-RL, random network | 15.0% | 26.3% | 25.6% |
-| Bio-RL, dopamine blocked | 30.0% | 35.3% | 37.9% |
-| Deep-RL, real wiring | 23.1% | 98.9% | 97.9% |
-| Deep-RL, shuffled wiring | 23.1% | 80.0% | 72.8% |
+| **Bio-RL, real wiring** | 33.1% | **99.3%** | **100.0%** |
+| Bio-RL, shuffled wiring | 21.9% | 21.9% | 27.2% |
+| Bio-RL, random network | 15.0% | 25.9% | 26.2% |
+| Bio-RL, dopamine blocked | 31.9% | 33.3% | 35.9% |
+| Deep-RL, real wiring | 23.1% | 99.0% | 97.4% |
+| Deep-RL, shuffled wiring | 23.1% | 82.8% | 75.9% |
 | Deep-RL, random network | 23.1% | 100.0% | 100.0% |
-| Deep-RL, real wiring, 150 songs | 21.9% | 99.8% | 97.4% |
+| Deep-RL, real wiring, 150 songs | 21.9% | 98.5% | 95.7% |
 
 End of practice is the average of songs 26 to 30 (146 to 150 for the last row). New song is a different song, played once with learning switched off.
 
-- **Dopamine does the learning.** With it blocked, the brain-style learner stays at 35%.
+- **Dopamine does the learning.** With it blocked, the brain-style learner stays at 33%.
 - **The brain-style learner needs the real wiring.** On shuffled wiring it stays at 22%, and on a random network at 26%. Shuffling makes the network fire out of control, so the fly presses on almost every beat; a random network barely passes the eyes' signal to the output neurons.
-- **A trained readout doesn't.** Deep-RL learns from almost any spiking activity: 98.9% on the real wiring, 80.0% on shuffled wiring and 100% on a random network.
-- **On the real wiring the two learners are tied.** Bio-RL passed 80% by song 3 to 5 on every run, and Deep-RL by song 4 or 5. Five times the practice (150 songs) didn't change Deep-RL (99.8%).
+- **A trained readout doesn't.** Deep-RL learns from almost any spiking activity: 99.0% on the real wiring, 82.8% on shuffled wiring and 100% on a random network.
+- **On the real wiring the two learners are tied.** Bio-RL passed 80% by song 3 or 4 on every run, and Deep-RL by song 4 or 5. Five times the practice (150 songs) didn't change Deep-RL (98.5%).
 
 Full numbers, spreads and the reasoning behind each control are in [docs/lab-notebook.md](docs/lab-notebook.md).
 
@@ -93,9 +94,10 @@ Open http://localhost:8766.
 - **Compare learners:** every learner and control on one chart, with a plain-language guide.
 
 ```bash
-node tools/test.mjs              # checks, about 10 s
-node tools/run_experiments.mjs   # every learner and control, about 25 min
-node tools/train_fly.mjs         # retrains the You vs fly opponent
+pip install -r requirements.txt
+python -m flyhero.test              # checks, about 4 min (the browser check also needs Node)
+python -m flyhero.run_experiments   # every learner and control, about 55 min on 22 cores
+python -m flyhero.train_fly         # retrains the You vs fly opponent
 ```
 
 To rebuild the network from the raw connectome, download three files from the [Janelia male CNS downloads](https://male-cns.janelia.org/download/) into `data/raw/` and run `python tools/extract_subgraph.py` (needs pandas and pyarrow):

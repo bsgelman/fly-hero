@@ -1,3 +1,4 @@
+// Browser port of flyhero/agents.py.
 // Agent A (Bio-RL): dopamine-gated, reward-prediction-error plasticity on KC->MBON synapses inside the connectome.
 // Agent B (Deep-RL): frozen connectome, REINFORCE on a linear softmax readout of descending-neuron spikes.
 import { rng } from './sim.js';
@@ -25,7 +26,7 @@ export class BioRL {
     this.rates = rates;
     this.action = action;
     this.V = action === WAIT ? 0 : Math.tanh(best / this.o.cRef);
-    if (action !== WAIT) this.elig = this.plasticPre[action].map(p => net.trace[p]); // eligibility snapshot
+    if (action !== WAIT) this.elig = Float64Array.from(this.plasticPre[action], p => net.trace[p]); // eligibility snapshot
     return action;
   }
 
@@ -59,18 +60,18 @@ export class DeepRL {
     this.kind = 'deep';
     this.rand = rng((opts.seed ?? 1) * 31 + 11);
     this.F = net.idx.dn.length;
-    this.W = [0, 1, 2, 3].map(() => new Float32Array(this.F));
-    this.b = new Float32Array(4);
+    this.W = [0, 1, 2, 3].map(() => new Float64Array(this.F));
+    this.b = new Float64Array(4);
     this.baseline = 0;
-    this.mu = new Float32Array(this.F);
-    this.var = new Float32Array(this.F).fill(1);
+    this.mu = new Float64Array(this.F);
+    this.var = new Float64Array(this.F).fill(1);
     this.seen = 0;
   }
 
   decide(net) {
     // Standardize each input with running statistics. Raw spike counts from hundreds of active neurons swamp the
     // softmax before it can learn, even though a readout told the answer decodes the lane from them perfectly.
-    const raw = Float32Array.from(net.idx.dn, i => Math.log1p(net.count[i]));
+    const raw = Float64Array.from(net.idx.dn, i => Math.log1p(net.count[i]));
     const k = 1 / Math.min(++this.seen, 200);
     for (let j = 0; j < this.F; j++) {
       const d = raw[j] - this.mu[j];

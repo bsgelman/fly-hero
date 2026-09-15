@@ -2,6 +2,31 @@
 
 The full detail behind the [README](../README.md): what is simulated, the learning rules, every control, complete results with spreads, and what I tried along the way.
 
+## The model moves to Python (2026-09-15)
+
+The model, experiments, training and tests are now Python (`flyhero/`, NumPy only). The page still needs the model to run live in the browser, so `js/sim.js`, `js/game.js` and `js/agents.js` are a line-for-line port. Every number below comes from the Python code.
+
+**Same spikes in both languages.** Both versions use float64 throughout and the same random number generator (mulberry32), consume random numbers in the same order, and add synaptic input in the same order, so rounding matches too. The two decay constants, exp(-1/5) and exp(-1/200), are written out as numbers because library exp functions can differ in the last digit. `python -m flyhero.test` runs Bio-RL (real wiring, 2 songs), Deep-RL (real wiring, 2 songs) and Bio-RL on shuffled and random wiring (1 song each) in both languages and checks that every spike and key press is identical. Learned weights agree to within 1e-9; tanh, exp and log1p differ in the last digit between Node and NumPy, which never changed a spike or a press.
+
+**The check found a bug in the old JavaScript.** Bio-RL's eligibility snapshot, the Kenyon cell spike traces used to decide which synapses change, was built with `.map` on an integer array, which returns an integer array. Traces were rounded down to whole numbers, so a synapse whose Kenyon cell fired recently but had a trace below 1 did not change at all. The Python model uses the real values, and the JavaScript port is fixed. The old version also stored weights, traces and the Deep-RL readout as float32, so every condition was rerun.
+
+**Speed.** NumPy runs one song in about 5 to 14 seconds, against about 0.5 seconds for the JavaScript, because each millisecond is a separate set of array operations. The 38 runs go in parallel, one process each: 3,218 seconds (54 minutes) on 22 cores. The You vs fly opponent (Bio-RL, real wiring, seed 1) goes from 28% to 100% on the practice song after 30 songs, and the browser port scores 100% with the saved weights.
+
+**Results from the Python model** (5 repeats of 30 songs; 3 repeats of 150 songs for the last row; mean and spread across repeats):
+
+| Learner | Before practice | Song 1 | End of practice | Runs reaching 80% (song) | New song | Presses on empty beats (last song) |
+|---|---|---|---|---|---|---|
+| Bio-RL, real wiring | 33.1% | 61.9% | 99.3% ± 0.5 | 5/5 (4, 3, 4, 3, 3) | 100.0% ± 0.0 | 0.0 / 16 |
+| Bio-RL, shuffled wiring | 21.9% | 21.9% | 21.9% ± 0.0 | 0/5 | 27.2% ± 1.3 | 15.0 / 16 |
+| Bio-RL, random network | 15.0% | 23.1% | 25.9% ± 14.2 | 0/5 | 26.2% ± 13.7 | 0.0 / 16 |
+| Bio-RL, dopamine blocked | 31.9% | 36.3% | 33.3% ± 2.6 | 0/5 | 35.9% ± 5.4 | 0.0 / 16 |
+| Deep-RL, real wiring | 23.1% | 50.6% | 99.0% ± 0.6 | 5/5 (5, 4, 4, 4, 5) | 97.4% ± 1.6 | 0.6 / 16 |
+| Deep-RL, shuffled wiring | 23.1% | 30.6% | 82.8% ± 11.6 | 4/5 (10, 11, 29, 6) | 75.9% ± 15.9 | 9.6 / 16 |
+| Deep-RL, random network | 23.1% | 78.1% | 100.0% ± 0.0 | 5/5 (3, 3, 3, 3, 3) | 100.0% ± 0.0 | 0.0 / 16 |
+| Deep-RL, real wiring, 150 songs | 21.9% | 47.9% | 98.5% ± 1.6 | 3/3 (5, 4, 4) | 95.7% ± 1.2 | 0.0 / 16 |
+
+**The conclusions hold.** Bio-RL on the real wiring still learns (99.3%, 100% on the new song) and now passes 80% a little sooner (song 3 or 4 on every run, against 3 to 5). It still fails on shuffled (21.9%) and random (25.9%) wiring and with dopamine blocked (33.3%). Deep-RL still learns on every wiring, and the two learners are still tied on the real wiring (99.3% and 99.0%). The rest of this notebook, including the learning rate sweep, was measured with the JavaScript version.
+
 ## Switch to the Janelia and Google male CNS (2026-09-15)
 
 The project was meant to use the Janelia and Google male CNS connectome from the start. Its neuPrint service needs a personal login token, which I couldn't get during the unattended first build, so the first version used the public FlyWire (female brain) files instead and borrowed male CNS cell positions only for the drawing. Janelia also publishes the male CNS as plain file downloads with no login, so the whole project now uses it: wiring, synapse signs (from its neurotransmitter predictions), the drawing, and each neuron's own position.
@@ -25,7 +50,7 @@ The project was meant to use the Janelia and Google male CNS connectome from the
 
 I picked 0.03, the highest mean of songs 26 to 30, using the same rule as the original sweep.
 
-**Male CNS results** (5 repeats of 30 songs; 3 repeats of 150 songs for the last row; mean and spread across repeats):
+**Male CNS results, JavaScript version before the eligibility fix** (5 repeats of 30 songs; 3 repeats of 150 songs for the last row; mean and spread across repeats):
 
 | Learner | Before practice | Song 1 | End of practice | Runs reaching 80% (song) | New song | Presses on empty beats (last song) |
 |---|---|---|---|---|---|---|
@@ -109,7 +134,7 @@ Plasticity is off and the dopamine neurons get no input. A linear softmax policy
 | random | A generic network: same neurons, same number of connections, same weights, but random endpoints. |
 | dopamine blocked | Agent A with the PAM and PPL1 drive set to zero. |
 
-All the numbers above were set once, before the full experiment runs. They are recorded in `js/agents.js` and in the lab notebook below.
+All the numbers above were set once, before the full experiment runs. They are recorded in `flyhero/agents.py` and in the lab notebook below.
 
 ## Results
 
@@ -163,7 +188,7 @@ This comparison has caveats:
 
 1. **Signed plasticity.** Real dopamine at KC→MBON synapses mostly *depresses* them. Here reward strengthens the chosen pathway.
 2. **Broadcast dopamine.** All PAM or all PPL1 neurons are driven together, not compartment by compartment.
-3. **Prediction computed in JS.** The prediction V is computed from MBON spikes in JavaScript, standing in for MBON→dopamine feedback (roughly as in Bennett et al. 2021).
+3. **Prediction computed in code.** The prediction V is computed from MBON spikes by the learner's code, standing in for MBON→dopamine feedback (roughly as in Bennett et al. 2021).
 4. **Winner-take-all.** The action readout over 3 MBON groups is a modeling choice. The groups are dealt round-robin by KC input, fixed before any results were seen.
 5. **KC→MBON gain of 8.** Without it the MBONs never fire from visual input (see the lab notebook).
 6. **Visual input.** Lanes are mapped onto real visual projection neurons that synapse onto KCs. That visual input is a small minority of what the mushroom body receives (about 6.5k synapses versus about 427k from central neurons, mostly olfactory).
