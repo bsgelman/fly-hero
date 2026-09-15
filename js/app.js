@@ -231,7 +231,10 @@ function setMode(mode) {
 document.querySelectorAll('[data-mode]').forEach(b => (b.onclick = () => setMode(b.dataset.mode)));
 $('cond').onchange = buildFly;
 $('reset').onclick = buildFly;
-$('speed').onchange = (e) => { S.speed = e.target.value === 'max' ? 'max' : +e.target.value; };
+// read the menu at startup too: browsers restore a select's previous choice on reload
+const readSpeed = () => { const v = $('speed').value; S.speed = v === 'max' ? 'max' : +v; };
+$('speed').onchange = readSpeed;
+readSpeed();
 $('humanStart').onclick = startHuman;
 
 // ---------- main loop ----------
