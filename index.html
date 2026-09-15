@@ -65,6 +65,7 @@
   .guide dd { margin: 2px 0 0; max-width: 60ch; color: var(--graphite); }
   .takeaway { margin-top: 24px; max-width: 60ch; }
   .guide .note { margin: 4px 0 0; max-width: 60ch; color: var(--graphite); }
+  .lead-in { max-width: 70ch; margin-bottom: 20px; }
   /* the result text flashes with the dopamine that fired, then fades back like the neuron flashes */
   .flash-gfp { font-weight: 600; animation: flash-gfp 900ms ease-out forwards; }
   .flash-magenta { font-weight: 600; animation: flash-magenta 900ms ease-out forwards; }
@@ -114,12 +115,12 @@
           <p id="humanMsg" style="margin-top:12px" aria-live="polite"></p>
         </div>
         <div id="curveBox">
-          <p class="small" style="margin-top:28px">Hit rate per episode</p>
+          <p class="small" style="margin-top:28px">Hit rate after each song</p>
           <canvas id="curve" width="300" height="120" role="img" aria-label="Line chart of this fly's hit rate per episode"></canvas>
         </div>
       </div>
       <div id="compare" hidden>
-        <p class="small">Each version of the fly played the same song 30 times, and each was run 5 separate times from scratch. The chart shows the average share of notes hit after every play; play 0 is before any learning.</p>
+        <p class="lead-in">Every version of the fly practised for <strong>30 songs</strong>: the same song played 30 times in a row, starting from zero. That was repeated 5 times. The chart shows the share of notes hit after each song, averaged over the 5 repeats. Song 0 is before any practice.</p>
         <div class="cmp-grid">
           <div>
             <canvas id="cmp" width="480" height="260" role="img" aria-label="Line chart of the average share of notes hit after each play, for every version of the fly; the table lists the values"></canvas>
@@ -145,16 +146,16 @@
               <dt>Dopamine blocked</dt>
               <dd>Bio-RL with its reward and punishment signal switched off. If it stops learning, dopamine is what does the learning.</dd>
             </dl>
-            <h3>Deep-RL, real wiring, 150 plays</h3>
-            <p class="note">An extra check to be fair to Deep-RL. It learns slowly, so this version got five times the practice: 150 plays instead of 30, repeated 3 times. It still only reached 75% (68% on the unseen song), well below the 96% Bio-RL reached after just 30 plays. For this row, Last 5 means plays 146 to 150, and it has no line on the chart because the chart stops at play 30.</p>
+            <h3>Deep-RL, real wiring, 150 songs</h3>
+            <p class="note">An extra check to be fair to Deep-RL. It learns slowly, so this version got five times the practice: 150 songs instead of 30, repeated 3 times. It still only reached 75% (68% on the new song), well below the 96% Bio-RL reached after just 30 songs. For this row, End of practice means songs 146 to 150, and it has no line on the chart because the chart stops at song 30.</p>
             <h3>What the numbers mean</h3>
             <dl>
-              <dt>Before</dt>
-              <dd>Share of notes hit on the first play, before any learning.</dd>
-              <dt>Last 5</dt>
-              <dd>Average share of notes hit over plays 26 to 30.</dd>
-              <dt>Unseen song</dt>
-              <dd>Share of notes hit on a new song it never practised, with learning switched off. A high score means it learned to read notes rather than memorise one song.</dd>
+              <dt>Before practice</dt>
+              <dd>Share of notes hit before any practice.</dd>
+              <dt>End of practice</dt>
+              <dd>Average share of notes hit over its last 5 songs (songs 26 to 30).</dd>
+              <dt>New song</dt>
+              <dd>After practice, the share of notes hit on a song it never heard, with learning switched off. A high score means it learned to read notes rather than memorise one song.</dd>
             </dl>
             <p class="takeaway">In short: the brain-style learner needed dopamine and brain-like structure to learn, but the fly's exact wiring made no difference in this test. It also beat the frozen-brain AI approach on the real and shuffled brains.</p>
           </div>

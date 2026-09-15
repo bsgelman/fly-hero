@@ -105,7 +105,7 @@ function advanceHuman(now) {
   if (t > songMs(SONGS.train) + 300) {
     h.done = true;
     $('humanMsg').textContent = `You: ${Math.round((100 * h.hits) / NOTES)}% (${count(h.extra, 'stray press', 'stray presses')}). ` +
-      `Fly: ${Math.round(100 * S.shadow.rate)}% (${count(S.shadow.wrong + S.shadow.falsePresses, 'stray press', 'stray presses')}, trained for ${count(S.curve.length, 'episode', 'episodes')}).`;
+      `Fly: ${Math.round(100 * S.shadow.rate)}% (${count(S.shadow.wrong + S.shadow.falsePresses, 'stray press', 'stray presses')}, after ${count(S.curve.length, 'song', 'songs')} of practice).`;
   }
 }
 
@@ -173,29 +173,35 @@ function drawGame(t, resultOf, humanPress) {
   g.lineWidth = 1;
 }
 
-function drawLines(canvas, series, colors, maxX, dashes = []) {
-  const g = canvas.getContext('2d'), W = canvas.width, H = canvas.height, L = 30;
+function drawLines(canvas, series, colors, maxX, dashes = [], x0 = 0) {
+  const g = canvas.getContext('2d'), W = canvas.width, H = canvas.height, L = 30, B = 16, plotH = H - 8 - B;
   g.clearRect(0, 0, W, H);
   g.fillStyle = C.graphite;
   g.font = '11px "Atkinson Hyperlegible Next", system-ui, sans-serif';
   g.fillText('100%', 0, 12);
-  g.fillText('0%', 12, H - 4);
+  g.fillText('0%', 12, 4 + plotH);
+  g.fillText('0', L, H - 3); // x axis counts songs played
+  g.textAlign = 'center';
+  g.fillText('songs played', L + (W - L) / 2, H - 3);
+  g.textAlign = 'right';
+  g.fillText(String(maxX), W - 2, H - 3);
+  g.textAlign = 'start';
   g.lineWidth = 1;
   g.setLineDash([]);
   g.strokeStyle = C.rule;
-  g.strokeRect(L, 4, W - L - 2, H - 8);
+  g.strokeRect(L, 4, W - L - 2, plotH);
   series.forEach((ys, k) => {
     g.strokeStyle = colors[k];
     g.lineWidth = 1.5;
     g.setLineDash(dashes[k] || []);
     g.beginPath();
-    ys.forEach((v, e) => g.lineTo(L + (e / maxX) * (W - L - 2), 4 + (1 - v) * (H - 8)));
+    ys.forEach((v, e) => g.lineTo(L + ((e + x0) / maxX) * (W - L - 2), 4 + (1 - v) * plotH));
     g.stroke();
   });
 }
 
 // Line shade encodes the wiring, dashes encode the learner; magenta is the dopamine-blocked control.
-const NAMES = { 'A-real': 'Bio-RL, real wiring', 'A-shuffled': 'Bio-RL, shuffled wiring', 'A-random': 'Bio-RL, random network', 'A-dopamine-blocked': 'Bio-RL, dopamine blocked', 'B-real': 'Deep-RL, real wiring', 'B-shuffled': 'Deep-RL, shuffled wiring', 'B-random': 'Deep-RL, random network', 'B-real-150ep': 'Deep-RL, real wiring, 150 plays' };
+const NAMES = { 'A-real': 'Bio-RL, real wiring', 'A-shuffled': 'Bio-RL, shuffled wiring', 'A-random': 'Bio-RL, random network', 'A-dopamine-blocked': 'Bio-RL, dopamine blocked', 'B-real': 'Deep-RL, real wiring', 'B-shuffled': 'Deep-RL, shuffled wiring', 'B-random': 'Deep-RL, random network', 'B-real-150ep': 'Deep-RL, real wiring, 150 songs' };
 const SERIES = { 'A-real': ['ink', []], 'A-shuffled': ['graphite', []], 'A-random': ['faint', []], 'A-dopamine-blocked': ['magenta', []], 'B-real': ['ink', [5, 3]], 'B-shuffled': ['graphite', [5, 3]], 'B-random': ['faint', [5, 3]] };
 
 function drawCompare() {
@@ -210,7 +216,7 @@ function drawCompare() {
   });
   drawLines($('cmp'), means, names.map(n => C[SERIES[n][0]]), results.meta.episodes, names.map(n => SERIES[n][1]));
   const pct = (v) => `${Math.round(100 * v)}%`;
-  $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real wiring, shuffled wiring and random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before</th><th scope="col">Last 5</th><th scope="col">Unseen song</th></tr>' +
+  $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real wiring, shuffled wiring and random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before practice</th><th scope="col">End of practice</th><th scope="col">New song</th></tr>' +
     Object.entries(results.conditions).map(([n, c]) =>
       `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${SERIES[n] ? C[SERIES[n][0]] : 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${NAMES[n] || n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
     '</table>';
@@ -260,9 +266,9 @@ function frame(now) {
     ep = S.ep;
     t = ep.t;
     resultOf = (s) => { const ev = ep.events[s]; return ev && (ev.action === ev.note ? 'hit' : 'miss'); };
-    $('hud').textContent = `Episode ${S.epNo}: ${ep.hits} of ${ep.notes} notes hit`;
+    $('hud').textContent = `Song ${S.epNo}: ${ep.hits} of ${ep.notes} notes hit`;
     $('prog').value = ep.t / songMs(SONGS.train);
-    drawLines($('curve'), [S.curve], [C.ink], Math.max(30, S.curve.length - 1));
+    drawLines($('curve'), [S.curve], [C.ink], Math.max(30, S.curve.length), [], 1); // first point is song 1
   }
   if (S.mode !== 'compare') {
     drawGame(t, resultOf, S.mode === 'human' ? S.human?.press : null);
