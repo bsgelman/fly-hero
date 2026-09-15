@@ -13,7 +13,7 @@ export class Brain {
     const g = bg.getContext('2d');
     g.fillStyle = colors.paper;
     g.fillRect(0, 0, W, H);
-    g.fillStyle = `rgba(${rgb(colors.ink)},0.06)`;
+    g.fillStyle = `rgba(${rgb(colors.ink)},0.09)`;
     for (let k = 0; k < points.length; k += 2) g.fillRect((points[k] / 65535) * W, (points[k + 1] / 65535) * H, 1, 1);
     const n = sub.neurons;
     this.xy = n.x.map((x, i) => [x * W, n.y[i] * H]);
