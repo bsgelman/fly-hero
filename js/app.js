@@ -14,6 +14,7 @@ try {
   throw err;
 }
 const results = await fetch('data/results.json').then(r => (r.ok ? r.json() : null)).catch(() => null);
+const trained = await fetch('data/trained_fly.bin').then(r => (r.ok ? r.arrayBuffer() : null)).catch(() => null); // from tools/train_fly.mjs
 const points = new Uint16Array(pointsBuf);
 
 // Colour tokens live in CSS so the canvases follow light and dark mode.
@@ -54,7 +55,7 @@ function newEpisode(count) {
 
 function onFlyEvents(ep) {
   while (S.seen < ep.events.length) {
-    const ev = ep.events[S.seen++], a = S.agent;
+    const ev = ep.events[S.seen++], a = ep.agent;
     if (ev.action !== WAIT) S.flyPress[ev.action] = ev.t;
     const dopamine = a.kind !== 'bio' ? '' : a.o.blocked ? ', dopamine blocked' : a.delta > 0 ? ', reward dopamine' : a.delta < 0 ? ', punishment dopamine' : '';
     const verdict = ev.note < 0 ? (ev.action === WAIT ? 'correct wait' : 'stray press') : ev.action === ev.note ? 'hit' : ev.action === WAIT ? 'miss' : 'wrong lane';
@@ -85,9 +86,22 @@ function advanceWatch(dt) {
 }
 
 // ---------- you vs fly ----------
+// You vs fly always faces the main fly (Bio-RL, real wiring) after 30 songs of practice.
+function practisedFly() {
+  const net = new Network(sub, wiring(sub, 'real', 1), { seed: 1, kcMbonGain: BIO_DEFAULTS.kcMbonGain });
+  const edges = net.plastic.flatMap(ids => [...ids]);
+  const ok = trained && trained.byteLength === 4 * edges.length; // ignore a stale file from a different network
+  if (ok) {
+    const learned = new Float32Array(trained);
+    edges.forEach((k, i) => { net.m[k] = learned[i]; });
+  }
+  return { net, agent: new BioRL(net, { seed: 1 }), practised: ok };
+}
+
 function startHuman() {
+  S.opponent ??= practisedFly();
   S.human = { t0: performance.now() + 2000, res: [], hits: 0, extra: 0, press: [-1e9, -1e9, -1e9], done: false };
-  S.shadow = new Episode(S.net, S.agent, SONGS.train, { learn: false });
+  S.shadow = new Episode(S.opponent.net, S.opponent.agent, SONGS.train, { learn: false });
   S.seen = 0;
   S.flyPress = [-1e9, -1e9, -1e9];
   $('humanMsg').textContent = 'Get ready…';
@@ -105,7 +119,7 @@ function advanceHuman(now) {
   if (t > songMs(SONGS.train) + 300) {
     h.done = true;
     $('humanMsg').textContent = `You: ${Math.round((100 * h.hits) / NOTES)}% (${count(h.extra, 'stray press', 'stray presses')}). ` +
-      `Fly: ${Math.round(100 * S.shadow.rate)}% (${count(S.shadow.wrong + S.shadow.falsePresses, 'stray press', 'stray presses')}, after ${count(S.curve.length, 'song', 'songs')} of practice).`;
+      `Fly: ${Math.round(100 * S.shadow.rate)}% (${count(S.shadow.wrong + S.shadow.falsePresses, 'stray press', 'stray presses')}, ${S.opponent.practised ? 'after 30 songs of practice' : 'untrained, because data/trained_fly.bin is missing'}).`;
   }
 }
 
@@ -224,12 +238,13 @@ function drawCompare() {
 
 // ---------- controls ----------
 function setMode(mode) {
-  if (S.shadow) newEpisode(false); // a you-vs-fly round reset the network state
+  if (S.shadow) newEpisode(false); // restart the watch song so the shared event counter lines up again
   S.mode = mode;
   S.human = S.shadow = null;
   document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
   $('play').hidden = mode === 'compare';
   $('compare').hidden = mode !== 'compare';
+  $('controls').hidden = mode !== 'watch'; // fly and speed only apply while watching
   $('brainCol').hidden = mode === 'compare'; // the fly pauses while the comparison is open
   document.querySelector('main').classList.toggle('solo', mode === 'compare');
   $('humanBox').hidden = mode !== 'human';

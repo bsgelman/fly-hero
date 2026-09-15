@@ -23,7 +23,7 @@ node tools/test.mjs
 node tools/run_experiments.mjs
 ```
 
-The tests take about 10 s. The experiments take about 12 min and rewrite `data/results.json`.
+The tests take about 10 s. The experiments take about 12 min and rewrite `data/results.json`. `node tools/train_fly.mjs` trains the fly you play against in You vs fly (30 songs of practice) and saves it to `data/trained_fly.bin`.
 
 To rebuild the data (Python with pandas and pyarrow), download three files into `data/raw/`:
 

@@ -85,7 +85,7 @@
     <button data-mode="human" aria-pressed="false">You vs fly</button>
     <button data-mode="compare" aria-pressed="false">Compare learners</button>
   </div>
-  <div class="controls">
+  <div class="controls" id="controls">
     <label>Fly
       <select id="cond" name="fly">
         <option value="bio:real">Bio-RL, real wiring</option>
@@ -110,7 +110,7 @@
         <progress id="prog" max="1" value="0" aria-label="Song progress"></progress>
         <canvas id="game" width="480" height="655" role="img" aria-label="Three lanes with notes falling toward the hit line"></canvas>
         <div id="humanBox" hidden>
-          <p style="margin-top:20px">Press <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> as a note reaches the line. The fly plays the same song with learning frozen.</p>
+          <p style="margin-top:20px">Press <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> as a note reaches the line. Your opponent is a Bio-RL fly that has already practised this song 30 times, playing with its learning frozen.</p>
           <button id="humanStart" class="btn">Start song</button>
           <p id="humanMsg" style="margin-top:12px" aria-live="polite"></p>
         </div>
