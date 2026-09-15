@@ -210,3 +210,11 @@ Ben found the first UI too busy and too obviously AI-made, and asked for somethi
 - **Brain:** one 2D canvas, no WebGL. The 139,248 neurons are pale grey dots, drawn once to an offscreen canvas. Simulated neurons flash black; PAM flashes green and PPL1 red. The header keeps the true counts.
 - **Removed:** glow, region labels and the schematic nerve cord, replaced by a one-line legend.
 - **Compare:** plain mean lines and a short table (before, last 5, unseen song).
+- **Accessibility pass** (web-interface-guidelines + ui-ux-pro-max checklist):
+  - Muted text raised to #6B6A67, for AA contrast.
+  - Visible `:focus-visible` rings; mode buttons use `aria-pressed`.
+  - Canvases get `role="img"` labels; the you-vs-fly result is announced with `aria-live`; there is a skip link.
+  - 44px touch targets on coarse pointers; the press animation respects reduced motion.
+  - Deep-RL lines are dashed, so colour isn't the only cue, and the table has a caption.
+  - Held or modified keys don't count as presses.
+- **Not changed:** the falling notes and spike flashes are the content, so they stay under reduced motion.

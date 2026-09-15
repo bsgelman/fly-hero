@@ -61,7 +61,7 @@ function startHuman() {
   S.shadow = new Episode(S.net, S.agent, SONGS.train, { learn: false });
   S.seen = 0;
   S.flyPress = [-1e9, -1e9, -1e9];
-  $('humanMsg').textContent = '';
+  $('humanMsg').textContent = 'Get ready…';
 }
 
 function advanceHuman(now) {
@@ -82,7 +82,8 @@ function advanceHuman(now) {
 
 addEventListener('keydown', (e) => {
   const lane = { j: 0, k: 1, l: 2 }[e.key.toLowerCase()], h = S.human;
-  if (S.mode !== 'human' || lane === undefined || !h || h.done) return;
+  if (S.mode !== 'human' || lane === undefined || !h || h.done || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  e.preventDefault(); // keep J/K/L from also changing a focused <select>
   const t = performance.now() - h.t0, notes = SONGS.train.notes;
   let best = -1;
   for (let s = 0; s < notes.length; s++) {
@@ -112,26 +113,28 @@ function drawGame(t, resultOf) {
     g.fillRect(n * lw + 15, hitY - (d / FALL_MS) * hitY - 6, lw - 30, 12);
   }
   g.font = '12px "SF Mono", Menlo, Consolas, monospace';
-  g.fillStyle = '#787774';
+  g.fillStyle = '#6B6A67';
   for (let l = 0; l < 3; l++) {
     g.fillText('JKL'[l], l * lw + lw / 2 - 4, H - 4);
     if (t - S.flyPress[l] < 150) g.fillText('fly', l * lw + lw / 2 - 8, hitY + 16);
   }
 }
 
-function drawLines(canvas, series, colors, maxX) {
+function drawLines(canvas, series, colors, maxX, dashes = []) {
   const g = canvas.getContext('2d'), W = canvas.width, H = canvas.height, L = 30;
   g.clearRect(0, 0, W, H);
-  g.fillStyle = '#787774';
+  g.fillStyle = '#6B6A67';
   g.font = '10px "SF Mono", Menlo, Consolas, monospace';
   g.fillText('100%', 0, 12);
   g.fillText('0%', 12, H - 4);
   g.lineWidth = 1;
+  g.setLineDash([]);
   g.strokeStyle = '#EAEAEA';
   g.strokeRect(L, 4, W - L - 2, H - 8);
   series.forEach((ys, k) => {
     g.strokeStyle = colors[k];
     g.lineWidth = 1.5;
+    g.setLineDash(dashes[k] || []);
     g.beginPath();
     ys.forEach((v, e) => g.lineTo(L + (e / maxX) * (W - L - 2), 4 + (1 - v) * (H - 8)));
     g.stroke();
@@ -150,11 +153,11 @@ function drawCompare() {
     const runs = results.conditions[n].runs.map(r => [r.before, ...r.curve]);
     return runs[0].map((_, e) => runs.reduce((s, r) => s + r[e], 0) / runs.length);
   });
-  drawLines($('cmp'), means, names.map(n => COLORS[n]), results.meta.episodes);
+  drawLines($('cmp'), means, names.map(n => COLORS[n]), results.meta.episodes, names.map(n => (n.startsWith('B-') ? [5, 3] : [])));
   const pct = (v) => `${Math.round(100 * v)}%`;
-  $('cmpTable').innerHTML = '<table><tr><th>fly</th><th>before</th><th>last 5</th><th>unseen song</th></tr>' +
+  $('cmpTable').innerHTML = '<table><caption class="muted">Mean hit rate over seeds. Solid lines are Bio-RL, dashed lines are Deep-RL.</caption><tr><th scope="col">Fly</th><th scope="col">Before</th><th scope="col">Last 5</th><th scope="col">Unseen song</th></tr>' +
     Object.entries(results.conditions).map(([n, c]) =>
-      `<tr><td><span class="swatch" style="background:${COLORS[n] || 'transparent'}"></span>${n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
+      `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${COLORS[n] || 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
     '</table>';
 }
 
@@ -163,7 +166,7 @@ function setMode(mode) {
   if (S.shadow) newEpisode(false); // a you-vs-fly round reset the network state
   S.mode = mode;
   S.human = S.shadow = null;
-  document.querySelectorAll('[data-mode]').forEach(b => (b.disabled = b.dataset.mode === mode));
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
   $('play').hidden = mode === 'compare';
   $('compare').hidden = mode !== 'compare';
   $('humanBox').hidden = mode !== 'human';
