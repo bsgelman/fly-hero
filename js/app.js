@@ -119,7 +119,7 @@ addEventListener('keydown', (e) => {
 
 // ---------- drawing ----------
 function drawGame(t, resultOf, humanPress) {
-  const c = $('game'), g = c.getContext('2d'), W = c.width, H = c.height, lw = W / 3, hitY = H - 56;
+  const c = $('game'), g = c.getContext('2d'), W = c.width, H = c.height, lw = W / 3, hitY = H - 64;
   const lane = [C.lane1, C.lane2, C.lane3];
   g.clearRect(0, 0, W, H);
   g.fillStyle = C.rule;
@@ -136,28 +136,28 @@ function drawGame(t, resultOf, humanPress) {
       g.strokeStyle = lane[n];
       g.lineWidth = 3;
       g.beginPath();
-      g.arc(n * lw + lw / 2, hitY, 16 + (1 - a) * 22, 0, 2 * Math.PI);
+      g.arc(n * lw + lw / 2, hitY, 22 + (1 - a) * 28, 0, 2 * Math.PI);
       g.stroke();
       g.globalAlpha = 1;
     } else if (d > -300) {
       g.fillStyle = res ? C.faint : lane[n];
-      g.fillRect(n * lw + 14, hitY - (d / FALL_MS) * hitY - 7, lw - 28, 14);
+      g.fillRect(n * lw + 20, hitY - (d / FALL_MS) * hitY - 10, lw - 40, 20);
     }
   }
-  g.font = '600 14px "Atkinson Hyperlegible Next", system-ui, sans-serif';
+  g.font = '600 20px "Atkinson Hyperlegible Next", system-ui, sans-serif';
   g.textAlign = 'center';
   g.lineWidth = 2;
   for (let l = 0; l < 3; l++) {
     const x = l * lw + lw / 2, lit = humanPress ? t - humanPress[l] < 120 : t - S.flyPress[l] < 150;
     g.fillStyle = lit ? lane[l] : C.paper;
-    g.fillRect(l * lw + 13, H - 41, lw - 26, 30);
+    g.fillRect(l * lw + 16, H - 50, lw - 32, 40);
     g.strokeStyle = lane[l];
-    g.strokeRect(l * lw + 13, H - 41, lw - 26, 30);
+    g.strokeRect(l * lw + 16, H - 50, lw - 32, 40);
     g.fillStyle = lit ? C.onlane : C.ink;
-    g.fillText('JKL'[l], x, H - 21);
+    g.fillText('JKL'[l], x, H - 23);
     if (humanPress && t - S.flyPress[l] < 150) { // in you-vs-fly, mark the fly's press above the line
       g.fillStyle = C.graphite;
-      g.fillText('fly', x, hitY - 8);
+      g.fillText('fly', x, hitY - 12);
     }
   }
   g.textAlign = 'start';
