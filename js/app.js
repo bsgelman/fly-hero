@@ -17,19 +17,10 @@ const results = await fetch('data/results.json').then(r => (r.ok ? r.json() : nu
 const trained = await fetch('data/trained_fly.bin').then(r => (r.ok ? r.arrayBuffer() : null)).catch(() => null); // from tools/train_fly.mjs
 const points = new Uint16Array(pointsBuf);
 
-// Colour tokens live in CSS so the canvases follow light and dark mode.
-let C;
-function readTheme() {
-  const cs = getComputedStyle(document.documentElement);
-  C = Object.fromEntries(['paper', 'ink', 'graphite', 'rule', 'faint', 'gfp', 'magenta', 'lane1', 'lane2', 'lane3', 'onlane'].map(k => [k, cs.getPropertyValue('--' + k).trim()]));
-}
-readTheme();
-let brain = new Brain($('brain'), $('brainHeader'), points, sub, C);
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  readTheme();
-  brain = new Brain($('brain'), $('brainHeader'), points, sub, C);
-  if (S.mode === 'compare') drawCompare();
-});
+// Colour tokens live in CSS so the canvases match the page.
+const cs = getComputedStyle(document.documentElement);
+const C = Object.fromEntries(['paper', 'ink', 'graphite', 'rule', 'faint', 'gfp', 'magenta', 'lane1', 'lane2', 'lane3', 'onlane'].map(k => [k, cs.getPropertyValue('--' + k).trim()]));
+const brain = new Brain($('brain'), $('brainHeader'), points, sub, C);
 
 const FALL_MS = 1600, WINDOW_MS = 150, NOTES = SONGS.train.notes.filter(n => n >= 0).length;
 const count = (k, one, many) => `${k} ${k === 1 ? one : many}`;
@@ -287,7 +278,7 @@ function frame(now) {
   }
   if (S.mode !== 'compare') {
     drawGame(t, resultOf, S.mode === 'human' ? S.human?.press : null);
-    brain.frame(ep.net);
+    brain.frame(ep.net, ep);
   }
   requestAnimationFrame(frame);
 }
