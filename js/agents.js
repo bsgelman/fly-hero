@@ -3,8 +3,9 @@
 import { rng } from './sim.js';
 import { WAIT } from './game.js';
 
+// kcMbonGain 1: in the Janelia/Google male CNS the output neurons respond to visual input with no boost (FlyWire needed 8).
 export const BIO_DEFAULTS = {
-  kcMbonGain: 8, noiseHz: 400, noiseKick: 1.2, theta: 0.5, cRef: 2, eta: 0.15, mMax: 4, dopaHz: 150, sMax: 12,
+  kcMbonGain: 1, noiseHz: 400, noiseKick: 1.2, theta: 0.5, cRef: 2, eta: 0.15, mMax: 4, dopaHz: 150, sMax: 12,
 };
 
 export class BioRL {
@@ -49,8 +50,8 @@ export class BioRL {
   }
 }
 
-// lr picked from a seed-1 sweep {0.1, 0.01, 0.005, 0.002} (see README lab notebook)
-export const DEEP_DEFAULTS = { lr: 0.002, baselineRate: 0.05 }; // network built with BIO_DEFAULTS.kcMbonGain for both agents
+// lr picked from a seed-1 sweep {0.03, 0.01, 0.003, 0.001} on the male CNS: highest mean of songs 26 to 30 (see docs/lab-notebook.md)
+export const DEEP_DEFAULTS = { lr: 0.03, baselineRate: 0.05 }; // network built with BIO_DEFAULTS.kcMbonGain for both agents
 
 export class DeepRL {
   constructor(net, opts = {}) {
@@ -61,10 +62,22 @@ export class DeepRL {
     this.W = [0, 1, 2, 3].map(() => new Float32Array(this.F));
     this.b = new Float32Array(4);
     this.baseline = 0;
+    this.mu = new Float32Array(this.F);
+    this.var = new Float32Array(this.F).fill(1);
+    this.seen = 0;
   }
 
   decide(net) {
-    const f = this.f = Float32Array.from(net.idx.dn, i => Math.log1p(net.count[i]));
+    // Standardize each input with running statistics. Raw spike counts from hundreds of active neurons swamp the
+    // softmax before it can learn, even though a readout told the answer decodes the lane from them perfectly.
+    const raw = Float32Array.from(net.idx.dn, i => Math.log1p(net.count[i]));
+    const k = 1 / Math.min(++this.seen, 200);
+    for (let j = 0; j < this.F; j++) {
+      const d = raw[j] - this.mu[j];
+      this.mu[j] += k * d;
+      this.var[j] += k * (d * (raw[j] - this.mu[j]) - this.var[j]);
+    }
+    const f = this.f = raw.map((v, j) => (v - this.mu[j]) / Math.sqrt(this.var[j] + 1e-3));
     const logits = this.W.map((w, a) => w.reduce((s, x, j) => s + x * f[j], this.b[a]));
     const mx = Math.max(...logits), ex = logits.map(z => Math.exp(z - mx)), Z = ex.reduce((s, x) => s + x, 0);
     this.p = ex.map(x => x / Z);

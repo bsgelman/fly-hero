@@ -3,3 +3,4 @@ __pycache__/
 docs/superpowers/
 docs/party-mode-debate.md
 .claude/
+.playwright-mcp/

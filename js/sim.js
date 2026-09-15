@@ -34,6 +34,7 @@ export function wiring(sub, variant = 'real', seed = 1) {
   if (variant === 'shuffled') {
     const blocks = new Map();
     for (let e = 0; e < pre.length; e++) {
+      if (role[pre[e]] === 'vnc' || role[post[e]] === 'vnc') continue; // the nerve cord is never scrambled
       const k = role[pre[e]] + '>' + role[post[e]];
       if (!blocks.has(k)) blocks.set(k, []);
       blocks.get(k).push(e);
@@ -44,12 +45,18 @@ export function wiring(sub, variant = 'real', seed = 1) {
       ids.forEach((e, i) => { post[e] = posts[i]; });
     }
   } else if (variant === 'random') {
-    const N = role.length;
+    // Only the brain circuit is randomised (its neurons come first); the nerve cord keeps its real wiring.
+    const N = role.filter(r => r !== 'vnc').length;
+    const brainEdges = [];
     for (let e = 0; e < pre.length; e++) {
+      if (role[pre[e]] === 'vnc' || role[post[e]] === 'vnc') continue;
+      brainEdges.push(e);
       pre[e] = Math.floor(rand() * N);
       do post[e] = Math.floor(rand() * N); while (post[e] === pre[e]);
     }
-    shuffleInPlace(w, rand);
+    const bw = brainEdges.map(e => w[e]);
+    shuffleInPlace(bw, rand);
+    brainEdges.forEach((e, i) => { w[e] = bw[i]; });
   } else if (variant !== 'real') throw new Error('unknown wiring ' + variant);
   return { pre, post, w };
 }
@@ -61,7 +68,7 @@ export class Network {
     this.rand = rng(seed);
     const role = sub.neurons.role, tag = sub.neurons.tag;
     this.idx = {};
-    for (const r of ['vpn', 'kc', 'apl', 'mbon', 'pam', 'ppl1', 'mid', 'dn'])
+    for (const r of ['vpn', 'kc', 'apl', 'mbon', 'pam', 'ppl1', 'mid', 'dn', 'vnc'])
       this.idx[r] = Int32Array.from(role.flatMap((x, i) => (x === r ? [i] : [])));
     this.laneVpn = [0, 1, 2].map(l => this.idx.vpn.filter(i => tag[i] === l));
     this.groupMbon = [0, 1, 2].map(k => this.idx.mbon.filter(i => tag[i] === k));

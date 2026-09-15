@@ -1,14 +1,14 @@
-"""Extract the Fly Hero subgraph + brain point cloud from public FlyWire v783 data.
+"""Extract the Fly Hero network and brain drawing from the Janelia/Google male CNS connectome (v1.0).
 
-Inputs (download into data/raw/, see README):
-  Connectivity_783.parquet  - github.com/philshiu/Drosophila_brain_model
-  annotations.tsv           - github.com/flyconnectome/flywire_annotations
-                              supplemental_files/Supplemental_file1_neuron_annotations.tsv
-  mcns_annotations.feather  - storage.googleapis.com/flyem-male-cns/v1.0/connectome-data/flat-connectome/
-                              body-annotations-male-cns-v1.0-minconf-0.5.feather (soma positions, CC-BY)
+One fly supplies everything: the wiring, the sign of every synapse, the drawing, and each neuron's position.
+
+Inputs (download into data/raw/ from https://male-cns.janelia.org/download/):
+  mcns_annotations.feather       body-annotations-male-cns-v1.0-minconf-0.5.feather
+  mcns_weights.feather           connectome-weights-male-cns-v1.0-minconf-0.5.feather
+  mcns_neurotransmitters.feather body-neurotransmitters-male-cns-v1.0.feather
 Outputs:
-  data/subgraph.json    simulated neurons (role, lane/group, drawing position) + signed edges
-  data/brain_points.bin Uint16 (x,y) soma positions of male CNS neurons, seen from above
+  data/subgraph.json    simulated neurons (role, lane/group, position) + signed synapse counts
+  data/brain_points.bin Uint16 (x,y) cell body positions of every neuron, seen from above
 """
 import json
 from pathlib import Path
@@ -18,34 +18,53 @@ import pandas as pd
 
 RAW, OUT = Path("data/raw"), Path("data")
 VPN_MIN_SYN, MBON_MIN_SYN, HOP_MIN_SYN = 10, 500, 10
+VNC_MIN_SYN = 100  # nerve cord neurons need this many synapses from the simulated descending neurons
+# Same rule as the Shiu et al. 2024 model: GABA and glutamate inhibit, everything else excites.
+# Histamine (fly photoreceptors) is inhibitory too; it did not occur in the FlyWire data that model used.
+INHIBITORY = {"gaba", "glutamate", "histamine"}
 
-a = pd.read_csv(RAW / "annotations.tsv", sep="\t", low_memory=False).set_index("root_id")
-c = pd.read_parquet(RAW / "Connectivity_783.parquet",
-                    columns=["Presynaptic_ID", "Postsynaptic_ID", "Connectivity", "Excitatory"])
-R = a[a.side == "right"]
+a = pd.read_feather(RAW / "mcns_annotations.feather").drop_duplicates("bodyId").set_index("bodyId")
 
-kc = list(R[R.cell_class == "Kenyon_Cell"].index)
-vk = (c[c.Presynaptic_ID.isin(a[a.super_class == "visual_projection"].index) & c.Postsynaptic_ID.isin(kc)]
-      .groupby("Presynaptic_ID").Connectivity.sum())
+w = pd.read_feather(RAW / "mcns_weights.feather")
+def column(*names):
+    found = [c for c in w.columns if c.lower() in names]
+    assert len(found) == 1, f"expected one of {names} in {list(w.columns)}"
+    return found[0]
+w = w.rename(columns={column("body_pre", "pre", "bodyid_pre", "pre_id"): "pre_id",
+                      column("body_post", "post", "bodyid_post", "post_id"): "post_id",
+                      column("weight", "syn", "count", "synapses"): "syn"})[["pre_id", "post_id", "syn"]]
+
+nt = pd.read_feather(RAW / "mcns_neurotransmitters.feather", columns=["body", "consensus_nt"]).set_index("body").consensus_nt
+
+R = a[a.somaSide == "R"]
+kc = list(R[R["class"] == "Kenyon_Cell"].index)
+vk = (w[w.pre_id.isin(a[a.superclass == "visual_projection"].index) & w.post_id.isin(kc)]
+      .groupby("pre_id").syn.sum())
 vpn = vk[vk >= VPN_MIN_SYN].sort_values(ascending=False, kind="stable")
-apl = list(R[R.cell_type == "APL"].index)
-kcout = c[c.Presynaptic_ID.isin(kc)].groupby("Postsynaptic_ID").Connectivity.sum()
-mbon = kcout[kcout.index.isin(a[a.cell_class == "MBON"].index)]
+apl = list(R[R.type.astype(str) == "APL"].index)
+kcout = w[w.pre_id.isin(kc)].groupby("post_id").syn.sum()
+mbon = kcout[kcout.index.isin(a[a["class"] == "MBON"].index)]
 mbon = mbon[mbon >= MBON_MIN_SYN].sort_values(ascending=False, kind="stable")
-dan = R[R.cell_class == "DAN"]
-pam = list(dan[dan.cell_type.str.startswith("PAM")].index)
-ppl1 = list(dan[dan.cell_type.str.startswith("PPL1")].index)
+pam = list(R[R.type.astype(str).str.startswith("PAM")].index)
+ppl1 = list(R[R.type.astype(str).str.startswith("PPL1")].index)
 
 # MBON -> (<=1 intermediate) -> descending neurons, every hop >= HOP_MIN_SYN synapses
-dn_all = set(a[a.super_class == "descending"].index)
-strong = c[c.Connectivity >= HOP_MIN_SYN]
+dn_all = set(a[a.superclass == "descending_neuron"].index)
+strong = w[w.syn >= HOP_MIN_SYN]
 taken = set(vpn.index) | set(kc) | set(apl) | set(mbon.index) | set(pam) | set(ppl1)
-mid = set(strong[strong.Presynaptic_ID.isin(mbon.index)].Postsynaptic_ID) - dn_all - taken
-mid = set(strong[strong.Presynaptic_ID.isin(mid) & strong.Postsynaptic_ID.isin(dn_all)].Presynaptic_ID)
-dns = set(strong[strong.Presynaptic_ID.isin(mid | set(mbon.index)) & strong.Postsynaptic_ID.isin(dn_all)].Postsynaptic_ID) - taken
+mid = set(strong[strong.pre_id.isin(mbon.index)].post_id) - dn_all - taken
+mid = set(strong[strong.pre_id.isin(mid) & strong.post_id.isin(dn_all)].pre_id)
+dns = set(strong[strong.pre_id.isin(mid | set(mbon.index)) & strong.post_id.isin(dn_all)].post_id) - taken
+
+# Nerve cord: the cord neurons that get the most input from the simulated descending neurons.
+# They only receive from the brain circuit (cord -> brain connections are dropped), so learning is unaffected.
+brain = taken | mid | dns
+vnc_all = set(a[a.superclass.astype(str).str.startswith("vnc")].index) - brain
+to_cord = w[w.pre_id.isin(dns) & w.post_id.isin(vnc_all)].groupby("post_id").syn.sum()
+vnc = sorted(to_cord[to_cord >= VNC_MIN_SYN].index)
 
 roles = [("vpn", list(vpn.index)), ("kc", kc), ("apl", apl), ("mbon", list(mbon.index)),
-         ("pam", pam), ("ppl1", ppl1), ("mid", sorted(mid)), ("dn", sorted(dns))]
+         ("pam", pam), ("ppl1", ppl1), ("mid", sorted(mid)), ("dn", sorted(dns)), ("vnc", vnc)]  # vnc last: brain indices unchanged
 ids, role, tag = [], [], []
 for r, members in roles:
     for i, rid in enumerate(members):
@@ -56,61 +75,52 @@ for r, members in roles:
 index = {rid: i for i, rid in enumerate(ids)}
 assert len(index) == len(ids), "neuron assigned to two roles"
 
-e = c[c.Presynaptic_ID.isin(index) & c.Postsynaptic_ID.isin(index)]
-e = e.assign(pre=e.Presynaptic_ID.map(index), post=e.Postsynaptic_ID.map(index)).sort_values(["pre", "post"])
+e = w[w.pre_id.isin(index) & w.post_id.isin(index)]
+cord = set(vnc)
+e = e[~(e.pre_id.isin(cord) & ~e.post_id.isin(cord))]  # drop cord -> brain connections
+sign = np.where(e.pre_id.map(nt).isin(INHIBITORY), -1, 1)
+e = e.assign(pre=e.pre_id.map(index), post=e.post_id.map(index), w=e.syn * sign).sort_values(["pre", "post"])
 
-# Drawing positions come from the Janelia male CNS (brain and nerve cord of one fly); FlyWire is brain-only.
-# View from above with the head at the top: x across the body, z along it. The male CNS right side has small x,
-# so x is mirrored to put the fly's right on the viewer's right.
-m = pd.read_feather(RAW / "mcns_annotations.feather")
-m = m[m.somaLocation.notna() & m.superclass.notna() & (m.statusLabel != "Glia")].copy()
-soma = np.stack(m.somaLocation.to_numpy()).astype(float)
-m["sx"], m["sz"] = soma[:, 0], soma[:, 2]
-x0, x1, z0, z1 = m.sx.min(), m.sx.max(), m.sz.min(), m.sz.max()
+# Drawing: every neuron's cell body, seen from above with the head at the top (x across the body, z along it).
+# The right side has small x, so x is mirrored to put the fly's right on the viewer's right.
+soma = a[a.somaLocation.notna() & a.superclass.notna() & (a.statusLabel != "Glia")]
+xyz = np.stack(soma.somaLocation.to_numpy()).astype(float)
+x0, x1, z0, z1 = xyz[:, 0].min(), xyz[:, 0].max(), xyz[:, 2].min(), xyz[:, 2].max()
 nx = lambda v: (x1 - v) / (x1 - x0)
 nz = lambda v: (v - z0) / (z1 - z0)
-pts = np.stack([nx(m.sx) * 65535, nz(m.sz) * 65535], axis=1).round().astype("<u2")
+pts = np.stack([nx(xyz[:, 0]) * 65535, nz(xyz[:, 2]) * 65535], axis=1).round().astype("<u2")
 OUT.mkdir(exist_ok=True)
 pts.tofile(OUT / "brain_points.bin")
 
-# Each simulated FlyWire neuron is drawn at the soma of a male CNS cell of the same type (same side when possible),
-# dealing out that type's cells in bodyId order. Neurons whose type has no male CNS match are not drawn.
-m["key"] = m.flywireType.fillna(m.type).astype(str)
-by_type = {k: g.sort_values("bodyId") for k, g in m.groupby("key")}
-side_code = {"right": "R", "left": "L"}
-dealt, sx, sy = {}, [], []
+# Each simulated neuron is drawn at its own cell body. The few without a recorded soma are not drawn.
+sx, sy = [], []
 for rid in ids:
-    t, side = a.at[rid, "cell_type"], side_code.get(a.at[rid, "side"])
-    g = by_type.get(t) if isinstance(t, str) else None
-    if g is not None and (g.somaSide == side).any():
-        g = g[g.somaSide == side]
-    if g is None:
+    loc = a.at[rid, "somaLocation"]
+    if loc is None or (isinstance(loc, float) and np.isnan(loc)):
         sx.append(-1.0)
         sy.append(-1.0)
-        continue
-    i = dealt.get((t, side), 0)
-    dealt[(t, side)] = i + 1
-    row = g.iloc[i % len(g)]
-    sx.append(nx(row.sx))
-    sy.append(nz(row.sz))
+    else:
+        sx.append(nx(float(loc[0])))
+        sy.append(nz(float(loc[2])))
+
 out = {
     "meta": {
-        "source": "FlyWire v783 (Dorkenwald et al. 2024; Schlegel et al. 2024); edges via Shiu et al. 2024",
-        "positions": "Janelia male CNS v1.0 soma locations (CC-BY), view from above; simulated neurons matched by cell type",
+        "source": "Janelia/Google male CNS connectome v1.0 (Berg et al. 2025), CC-BY; neuron model after Shiu et al. 2024",
+        "positions": "own cell body locations in the same fly, seen from above",
         "aspect": float((z1 - z0) / (x1 - x0)),
         "n_unplaced": int(sum(v < 0 for v in sx)),
         "n_points": int(len(pts)),
-        "counts": {r: len(m) for r, m in roles},
-        "n_neurons": len(ids), "n_edges": int(len(e)), "n_synapses": int(e.Connectivity.sum()),
-        "thresholds": {"vpn_min_syn": VPN_MIN_SYN, "mbon_min_syn": MBON_MIN_SYN, "hop_min_syn": HOP_MIN_SYN},
+        "counts": {r: len(members) for r, members in roles},
+        "n_neurons": len(ids), "n_brain_neurons": len(ids) - len(vnc), "n_edges": int(len(e)), "n_synapses": int(e.syn.sum()),
+        "n_inhibitory_edges": int((e.w < 0).sum()),
+        "thresholds": {"vpn_min_syn": VPN_MIN_SYN, "mbon_min_syn": MBON_MIN_SYN, "hop_min_syn": HOP_MIN_SYN, "vnc_min_syn": VNC_MIN_SYN},
     },
     "neurons": {
         "role": role, "tag": tag,
-        "type": [str(t) if isinstance(t, str) else "" for t in a.loc[ids].cell_type],
+        "type": [str(t) if isinstance(t, str) else "" for t in a.loc[ids].type],
         "x": [round(float(v), 4) for v in sx], "y": [round(float(v), 4) for v in sy],
     },
-    "edges": {"pre": e.pre.tolist(), "post": e.post.tolist(),
-              "w": (e.Connectivity * e.Excitatory).astype(int).tolist()},
+    "edges": {"pre": e.pre.tolist(), "post": e.post.tolist(), "w": e.w.astype(int).tolist()},
 }
 (OUT / "subgraph.json").write_text(json.dumps(out, separators=(",", ":")))
 print(json.dumps(out["meta"], indent=1))

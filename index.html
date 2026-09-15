@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#FDFDFD" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15181C" media="(prefers-color-scheme: dark)">
 <title>Fly Hero</title>
+<link rel="icon" href="data:,">
 <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Look borrowed from fluorescence microscopy figures: ink on paper, GFP green for reward, magenta for punishment.
@@ -151,7 +152,7 @@
               <dd>Bio-RL with dopamine switched off. Tests whether dopamine drives the learning.</dd>
             </dl>
             <h3>Deep-RL, real wiring, 150 songs</h3>
-            <p class="note">Deep-RL given 150 songs of practice instead of 30, to see if it just needed more time. It reached 75%, still below Bio-RL's 96%.</p>
+            <p class="note">Deep-RL given 150 songs of practice instead of 30, to see if more practice helps. It reached 99.8%, about the same as after 30 songs.</p>
             <h3>What the numbers mean</h3>
             <dl>
               <dt>Before practice</dt>
@@ -161,7 +162,7 @@
               <dt>New song</dt>
               <dd>Notes hit on a song it never practised, with learning off.</dd>
             </dl>
-            <p class="takeaway">In short: learning needed dopamine and brain structure, but not the fly's exact connections. Bio-RL also beat Deep-RL on real and shuffled wiring.</p>
+            <p class="takeaway">In short: the brain-style learner needed dopamine and the fly's real wiring. The trained readout learned on every wiring, even a random one.</p>
           </div>
         </div>
       </div>
@@ -170,16 +171,15 @@
       <p id="brainHeader">&nbsp;</p>
       <canvas id="brain" width="480" height="655" role="img" aria-label="The fly's brain and nerve cord seen from above; simulated neurons flash when they spike"></canvas>
       <p id="lastEvent" class="small" style="margin-top:12px">&nbsp;</p>
-      <p class="legend">Each grey dot is the cell body of one of 139,662 neurons in a fly's brain and nerve cord (Janelia male CNS), seen from above with the head at the top. The empty band below the brain is the neck: only nerve fibres pass through it, so it has no cell bodies to draw. The simulated neurons come from the FlyWire brain and are drawn at a cell of the same type. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes as it spikes. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
+      <p class="legend">Each grey dot is the cell body of one of 139,662 neurons in a fly's brain and nerve cord (Janelia and Google male CNS), seen from above with the head at the top. The empty band below the brain is the neck: only nerve fibres pass through it, so it has no cell bodies to draw. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes as it spikes. Nerve cord neurons flash when the brain's descending neurons send signals down the neck. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
     </div>
   </main>
 
   <footer class="credits">
     <h2>Based on published research</h2>
     <ul>
-      <li>Brain wiring and cell types: the FlyWire connectome of an adult fruit fly brain. Dorkenwald et al., <a href="https://doi.org/10.1038/s41586-024-07558-y">Nature 2024</a>; Schlegel et al., <a href="https://doi.org/10.1038/s41586-024-07686-5">Nature 2024</a>.</li>
+      <li>Brain wiring, cell types and drawing: the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., <a href="https://doi.org/10.1101/2025.10.09.680999">bioRxiv 2025</a>.</li>
       <li>Neuron model: Shiu et al., <a href="https://doi.org/10.1038/s41586-024-07763-9">Nature 2024</a>.</li>
-      <li>Brain and nerve cord drawing: the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., <a href="https://doi.org/10.1101/2025.10.09.680999">bioRxiv 2025</a>.</li>
       <li>Dopamine learning rule: inspired by Bennett, Philippides and Nowotny, <a href="https://doi.org/10.1038/s41467-021-22592-4">Nature Communications 2021</a>.</li>
     </ul>
   </footer>

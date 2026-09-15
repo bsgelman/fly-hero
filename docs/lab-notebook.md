@@ -2,6 +2,52 @@
 
 The full detail behind the [README](../README.md): what is simulated, the learning rules, every control, complete results with spreads, and what I tried along the way.
 
+## Switch to the Janelia and Google male CNS (2026-09-15)
+
+The project was meant to use the Janelia and Google male CNS connectome from the start. Its neuPrint service needs a personal login token, which I couldn't get during the unattended first build, so the first version used the public FlyWire (female brain) files instead and borrowed male CNS cell positions only for the drawing. Janelia also publishes the male CNS as plain file downloads with no login, so the whole project now uses it: wiring, synapse signs (from its neurotransmitter predictions), the drawing, and each neuron's own position.
+
+**New network.** Same selection rules, now from the male CNS: 62 eye neurons, 2,045 Kenyon cells, 1 APL, 42 output neurons, 158 reward and 8 punishment dopamine neurons, 461 intermediate and 498 descending neurons. That is 3,275 neurons, 518,428 connections and 1,922,033 synapses; 12 neurons have no recorded cell body and are not drawn. Synapse signs come from the male CNS neurotransmitter predictions, using the same rule as the Shiu model (GABA, glutamate and histamine inhibit, everything else excites).
+
+**No boost needed.** Driving one lane's eye neurons at the plain model weights already makes all three output groups fire (about 1 to 2 spikes per neuron). The old boost of 8 now overdrives the network: Kenyon cell spikes jump from about 80 to about 2,300 and reward dopamine neurons fire with no reward. The boost is now 1.
+
+**Bio-RL, seed 1, boost 1:** 53%, 75%, 94%, then 97 to 100% from song 4; 100% on the new song. With dopamine blocked it stays at 28 to 38% (33% on the new song).
+
+**Deep-RL first failed, and the reason was the readout, not the brain.** With the old setup it sat at about 41% for 30 songs at every learning rate and pressed on almost every empty beat. To check whether the descending neurons carry lane information, I recorded their spike counts for 288 beats with learning off and trained a plain readout that is told the answer: 100% accuracy on held-out beats (the most common answer alone gives 30%), and 98% from the output neurons. So the information is there; hundreds of active inputs with large counts were swamping the softmax. Deep-RL now standardizes each input with running statistics, a standard step for this kind of readout.
+
+**Deep-RL learning rate sweep on the male CNS** (seed 1, 30 songs, standardized inputs):
+
+| Learning rate | Mean of songs 26 to 30 | New song |
+|---|---|---|
+| 0.03 | 99% | 97% |
+| 0.01 | 98% | 95% |
+| 0.003 | 96% | 95% |
+| 0.001 | 91% | 90% |
+
+I picked 0.03, the highest mean of songs 26 to 30, using the same rule as the original sweep.
+
+**Male CNS results** (5 repeats of 30 songs; 3 repeats of 150 songs for the last row; mean and spread across repeats):
+
+| Learner | Before practice | Song 1 | End of practice | Runs reaching 80% (song) | New song | Presses on empty beats (last song) |
+|---|---|---|---|---|---|---|
+| Bio-RL, real wiring | 31.9% | 61.9% | 99.6% ± 0.3 | 5/5 (4, 5, 5, 3, 3) | 100.0% ± 0.0 | 0.0 / 16 |
+| Bio-RL, shuffled wiring | 21.9% | 21.9% | 21.9% ± 0.0 | 0/5 | 26.7% ± 1.3 | 15.0 / 16 |
+| Bio-RL, random network | 15.0% | 21.9% | 26.3% ± 14.3 | 0/5 | 25.6% ± 13.3 | 0.0 / 16 |
+| Bio-RL, dopamine blocked | 30.0% | 32.5% | 35.3% ± 2.5 | 0/5 | 37.9% ± 5.5 | 0.0 / 16 |
+| Deep-RL, real wiring | 23.1% | 49.4% | 98.9% ± 0.8 | 5/5 (5, 4, 4, 4, 4) | 97.9% ± 2.5 | 0.4 / 16 |
+| Deep-RL, shuffled wiring | 23.1% | 29.4% | 80.0% ± 11.6 | 2/5 (19, 6) | 72.8% ± 6.2 | 6.0 / 16 |
+| Deep-RL, random network | 23.1% | 78.1% | 100.0% ± 0.0 | 5/5 (3, 3, 3, 3, 3) | 100.0% ± 0.0 | 0.0 / 16 |
+| Deep-RL, real wiring, 150 songs | 21.9% | 46.9% | 99.8% ± 0.3 | 3/3 (5, 4, 4) | 97.4% ± 2.1 | 0.3 / 16 |
+
+**Why the brain-style learner fails on scrambled wiring.** I drove one lane's eye neurons at a time and counted spikes. In the real wiring each output group fires about 1 to 2 spikes per neuron and Kenyon cells stay sparse. In shuffled wiring, activity snowballs after the first input: intermediate and descending neurons fire thousands of spikes and output neurons up to 15 per neuron, so the fly presses the same lane on almost every beat (15 of 16 empty beats on the last song) and learning never gets started. In a random network the eyes' signal barely reaches the output neurons (0 to 1.4 spikes per neuron), so there is nothing to strengthen. Descending neurons still carry some lane-specific activity there, which is why the trained readout learns on a random network.
+
+**This reverses the FlyWire result.** On FlyWire, shuffled wiring did as well as the real wiring for Bio-RL (100% vs 96%). On the male CNS, the real wiring's balance is what lets learning inside the brain work.
+
+**Punishment dopamine fires a little on its own.** Over 5 songs with learning on, the 8 PPL1 neurons fired about 4 spikes in the 100 ms after a hit (in 66% of hits), about 73 after a mistake, and about 15 during the decision window before any feedback, all from ordinary network input. Reward dopamine (PAM) fired about 315 spikes after a hit. The stray punishment spikes are small next to the real signals, so learning still works.
+
+**Nerve cord added.** 3,625 nerve cord neurons that get at least 100 synapses from the simulated descending neurons, plus the connections among them: 6,900 neurons, 990,102 connections and 6,419,481 synapses in total. Cord to brain connections are dropped and the wiring controls leave the cord untouched. Replaying Bio-RL on real, shuffled and random wiring, and Deep-RL on real wiring, with and without the cord gave identical key presses. With real wiring, 2,153 of the 3,625 cord neurons fire. The page still plays at 1.00× speed.
+
+**The sections below describe the original FlyWire version.** Results from the male CNS rerun are recorded here once it finishes.
+
 ## What is simulated
 
 This is the right-hemisphere mushroom-body loop, selected by fixed rules in `tools/extract_subgraph.py`:

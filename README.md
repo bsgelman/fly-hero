@@ -2,18 +2,18 @@
 
 A spiking model of a real fruit fly brain learns a three-lane rhythm game by trial and error. The learning happens inside the simulated brain: dopamine strengthens the synapses that led to a hit and weakens the ones that led to a mistake.
 
-**40% of notes hit before practice, 96% after 30 songs, and 96% on a song it never heard.** With its dopamine neurons blocked, it stays at 41%.
+**32% of notes hit before practice, 99.6% after 30 songs, and 100% on a song it never heard.** With its dopamine neurons blocked, it stays at 35%.
 
 ![Fly Hero: the game on the left, the simulated brain and nerve cord on the right](docs/images/watch.png)
 
-The brain has 3,371 simulated neurons and 650,482 synapses taken from the FlyWire connectome of an adult fruit fly. Every neuron that fires flashes on the brain view as it happens.
+The simulation has 6,900 neurons (3,275 in the brain and 3,625 in the nerve cord) and 6,419,481 synapses from the Janelia and Google male fruit fly connectome. Every neuron that fires flashes on the brain view as it happens, all the way down the nerve cord.
 
 ## How it works
 
 ```
-FlyWire connectome (public data)
+Janelia/Google male CNS connectome (public data)
    │
-   ▼  extract_subgraph.py   connectome  →  3,371 neurons, 650,482 synapses
+   ▼  extract_subgraph.py   connectome  →  6,900 neurons, 6,419,481 synapses
    ▼  sim.js                synapses    →  spiking neurons, 1 ms steps
    ▼  game.js               notes       →  the eye neurons for that lane fire
    ▼  agents.js             spikes      →  key press, reward, dopamine, synapse update
@@ -22,10 +22,10 @@ FlyWire connectome (public data)
 
 | File | Lines | Job |
 |---|--:|---|
-| `tools/extract_subgraph.py` | 116 | Picks the eye, memory, dopamine and output neurons from FlyWire and writes the network |
-| `js/sim.js` | 155 | Leaky integrate-and-fire neurons on the real synapse list, plus the shuffled and random wiring controls |
+| `tools/extract_subgraph.py` | 126 | Picks the eye, memory, dopamine, output and nerve cord neurons from the male CNS and writes the network |
+| `js/sim.js` | 162 | Leaky integrate-and-fire neurons on the real synapse list, plus the shuffled and random wiring controls |
 | `js/game.js` | 62 | Songs, rewards and a millisecond-level game loop |
-| `js/agents.js` | 89 | Bio-RL (dopamine learning inside the brain) and Deep-RL (a trained readout) |
+| `js/agents.js` | 102 | Bio-RL (dopamine learning inside the brain) and Deep-RL (a trained readout) |
 | `js/app.js` | 294 | The page: watch the fly learn, you vs fly, compare learners |
 | `js/brain.js` | 37 | Brain and nerve cord drawing |
 | `tools/run_experiments.mjs` | 68 | Runs every learner and control and writes `data/results.json` |
@@ -40,21 +40,21 @@ Each learner practised for 30 songs (the same song 30 times), repeated 5 times f
 
 | Learner | Before practice | End of practice | New song |
 |---|--:|--:|--:|
-| **Bio-RL, real wiring** | 40% | **96%** | **96%** |
-| Bio-RL, shuffled wiring | 38% | 100% | 100% |
-| Bio-RL, random network | 6% | 7% | 9% |
-| Bio-RL, dopamine blocked | 39% | 41% | 36% |
-| Deep-RL, real wiring | 23% | 56% | 57% |
-| Deep-RL, shuffled wiring | 23% | 74% | 67% |
-| Deep-RL, random network | 23% | 48% | 44% |
-| Deep-RL, real wiring, 150 songs | 22% | 75% | 68% |
+| **Bio-RL, real wiring** | 31.9% | **99.6%** | **100.0%** |
+| Bio-RL, shuffled wiring | 21.9% | 21.9% | 26.7% |
+| Bio-RL, random network | 15.0% | 26.3% | 25.6% |
+| Bio-RL, dopamine blocked | 30.0% | 35.3% | 37.9% |
+| Deep-RL, real wiring | 23.1% | 98.9% | 97.9% |
+| Deep-RL, shuffled wiring | 23.1% | 80.0% | 72.8% |
+| Deep-RL, random network | 23.1% | 100.0% | 100.0% |
+| Deep-RL, real wiring, 150 songs | 21.9% | 99.8% | 97.4% |
 
 End of practice is the average of songs 26 to 30 (146 to 150 for the last row). New song is a different song, played once with learning switched off.
 
-- **Dopamine does the learning.** Blocking it keeps the fly at 41%.
-- **Brain structure matters.** A fully random network never learns (7%).
-- **The exact connections don't.** Shuffled wiring keeps the brain's structure but rewires individual synapses at random, and it did as well as the real wiring.
-- **Learning inside the brain beat a trained readout.** On real and shuffled wiring, Bio-RL passed 80% by song 3 or 4 on every run. Deep-RL keeps the brain frozen and trains a separate readout, and it reached 75% even with five times the practice.
+- **Dopamine does the learning.** With it blocked, the brain-style learner stays at 35%.
+- **The brain-style learner needs the real wiring.** On shuffled wiring it stays at 22%, and on a random network at 26%. Shuffling makes the network fire out of control, so the fly presses on almost every beat; a random network barely passes the eyes' signal to the output neurons.
+- **A trained readout doesn't.** Deep-RL learns from almost any spiking activity: 98.9% on the real wiring, 80.0% on shuffled wiring and 100% on a random network.
+- **On the real wiring the two learners are tied.** Bio-RL passed 80% by song 3 to 5 on every run, and Deep-RL by song 4 or 5. Five times the practice (150 songs) didn't change Deep-RL (99.8%).
 
 Full numbers, spreads and the reasoning behind each control are in [docs/lab-notebook.md](docs/lab-notebook.md).
 
@@ -66,13 +66,15 @@ Full numbers, spreads and the reasoning behind each control are in [docs/lab-not
 
 **Mistakes can't wipe out what it learned.** Simple dopamine rules often fail because early mistakes far outnumber hits. Here a change shrinks to zero once a pathway already predicts its reward, only synapses that just fired can change, waiting changes nothing, and synapse strength is capped.
 
-**The brain view shows the whole nervous system.** FlyWire maps only the brain, so the drawing uses cell positions from the Janelia male CNS, which includes the nerve cord, and places each simulated neuron at a cell of the same type.
+**One fly for everything.** The wiring, the sign of every synapse, the drawing and each neuron's position all come from the Janelia and Google male CNS connectome, so every flash is at that neuron's own cell body.
+
+**The nerve cord fires too.** 3,625 nerve cord neurons receive the brain's descending neurons, so activity travels down the neck when the fly acts. The cord only listens: nothing flows back into the brain, and the wiring controls leave it untouched. Replaying runs with and without it gave identical key presses.
 
 **Settings were fixed before the results.** Every learner and control runs through the same code with the same parameters, set once before the experiments.
 
 ## Limitations
 
-Each note is a single decision, so this is reward prediction error learning, not learning over long sequences. In real flies, dopamine mostly weakens these synapses, while here reward strengthens them. Dopamine reaches the whole memory centre at once rather than individual compartments. The output neurons needed an 8× boost before visual input could make them fire. Only the right half of the brain is simulated, and flash positions come from a different fly, so they are approximate.
+Each note is a single decision, so this is reward prediction error learning, not learning over long sequences. In real flies, dopamine mostly weakens these synapses, while here reward strengthens them. Dopamine reaches the whole memory centre at once rather than individual compartments. Only the right half of the brain is simulated, and the nerve cord only receives signals from the brain.
 
 ## Running it
 
@@ -90,23 +92,22 @@ Open http://localhost:8766.
 
 ```bash
 node tools/test.mjs              # checks, about 10 s
-node tools/run_experiments.mjs   # every learner and control, about 12 min
+node tools/run_experiments.mjs   # every learner and control, about 25 min
 node tools/train_fly.mjs         # retrains the You vs fly opponent
 ```
 
-To rebuild the network from the raw connectome, download three files into `data/raw/` and run `python tools/extract_subgraph.py` (needs pandas and pyarrow):
+To rebuild the network from the raw connectome, download three files from the [Janelia male CNS downloads](https://male-cns.janelia.org/download/) into `data/raw/` and run `python tools/extract_subgraph.py` (needs pandas and pyarrow):
 
-- `Connectivity_783.parquet` from [philshiu/Drosophila_brain_model](https://github.com/philshiu/Drosophila_brain_model)
-- `supplemental_files/Supplemental_file1_neuron_annotations.tsv` from [flyconnectome/flywire_annotations](https://github.com/flyconnectome/flywire_annotations), saved as `annotations.tsv`
-- `body-annotations-male-cns-v1.0-minconf-0.5.feather` from the [Janelia male CNS downloads](https://male-cns.janelia.org/download/), saved as `mcns_annotations.feather`
+- `body-annotations-male-cns-v1.0-minconf-0.5.feather`, saved as `mcns_annotations.feather`
+- `connectome-weights-male-cns-v1.0-minconf-0.5.feather`, saved as `mcns_weights.feather` (about 1 GB)
+- `body-neurotransmitters-male-cns-v1.0.feather`, saved as `mcns_neurotransmitters.feather`
 
 ## Based on published research
 
-- **Brain wiring and cell types:** the FlyWire connectome. Dorkenwald et al., [Nature 2024](https://doi.org/10.1038/s41586-024-07558-y); Schlegel et al., [Nature 2024](https://doi.org/10.1038/s41586-024-07686-5).
 - **Neuron model:** Shiu et al., [Nature 2024](https://doi.org/10.1038/s41586-024-07763-9).
-- **Brain and nerve cord drawing:** the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., [bioRxiv 2025](https://doi.org/10.1101/2025.10.09.680999).
+- **Brain wiring, cell types and drawing:** the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., [bioRxiv 2025](https://doi.org/10.1101/2025.10.09.680999).
 - **Dopamine learning rule:** inspired by Bennett, Philippides and Nowotny, [Nature Communications 2021](https://doi.org/10.1038/s41467-021-22592-4).
 
 ## License
 
-Code is under the MIT License. The network and brain positions are derived from FlyWire and Janelia male CNS data, both CC-BY and credited above. The typeface is Atkinson Hyperlegible Next under the SIL Open Font License (`fonts/OFL.txt`).
+Code is under the MIT License. The network and brain positions are derived from the Janelia and Google male CNS data (CC-BY), credited above. The typeface is Atkinson Hyperlegible Next under the SIL Open Font License (`fonts/OFL.txt`).

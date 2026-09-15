@@ -229,7 +229,7 @@ function drawCompare() {
     return runs[0].map((_, e) => runs.reduce((s, r) => s + r[e], 0) / runs.length);
   });
   drawLines($('cmp'), means, names.map(n => C[SERIES[n][0]]), results.meta.episodes, names.map(n => SERIES[n][1]));
-  const pct = (v) => `${Math.round(100 * v)}%`;
+  const pct = (v) => `${(100 * v).toFixed(1)}%`; // one decimal, so 99.6% is not shown as 100%
   $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real wiring, shuffled wiring and random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before practice</th><th scope="col">End of practice</th><th scope="col">New song</th></tr>' +
     Object.entries(results.conditions).map(([n, c]) =>
       `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${SERIES[n] ? C[SERIES[n][0]] : 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${NAMES[n] || n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
