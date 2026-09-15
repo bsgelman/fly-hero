@@ -66,6 +66,10 @@
   .takeaway { margin-top: 24px; max-width: 60ch; }
   .guide .note { margin: 4px 0 0; max-width: 60ch; color: var(--graphite); }
   .lead-in { max-width: 70ch; margin-bottom: 20px; }
+  .credits { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule); max-width: 80ch; font-size: 14px; color: var(--graphite); }
+  .credits h2 { margin: 0 0 8px; font-size: 16px; color: var(--ink); }
+  .credits ul { margin: 0 0 12px; padding-left: 18px; }
+  .credits a { color: var(--ink); }
   /* the result text flashes with the dopamine that fired, then fades back like the neuron flashes */
   .flash-gfp { font-weight: 600; animation: flash-gfp 900ms ease-out forwards; }
   .flash-magenta { font-weight: 600; animation: flash-magenta 900ms ease-out forwards; }
@@ -140,9 +144,9 @@
               <dt>Real wiring</dt>
               <dd>Copied from a map of a real fruit fly's brain.</dd>
               <dt>Shuffled wiring</dt>
-              <dd>The brain's overall structure is kept, but individual synapses are rewired at random. Tests whether exact connections matter.</dd>
+              <dd>Signals still flow eyes to memory to output, but the individual synapses are rewired at random. Tests whether exact connections matter.</dd>
               <dt>Random network</dt>
-              <dd>Every synapse is placed at random, so the brain's structure is lost. Tests whether brain structure matters.</dd>
+              <dd>Any neuron can connect to any other, so signals don't follow a real brain's route from the eyes, through memory, to output. Tests whether brain structure matters.</dd>
               <dt>Dopamine blocked</dt>
               <dd>Bio-RL with dopamine switched off. Tests whether dopamine drives the learning.</dd>
             </dl>
@@ -169,6 +173,17 @@
       <p class="legend">Each grey dot is the cell body of one of 139,662 neurons in a fly's brain and nerve cord (Janelia male CNS), seen from above with the head at the top. The empty band below the brain is the neck: only nerve fibres pass through it, so it has no cell bodies to draw. The simulated neurons come from the FlyWire brain and are drawn at a cell of the same type. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes as it spikes. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
     </div>
   </main>
+
+  <footer class="credits">
+    <h2>Based on published research</h2>
+    <ul>
+      <li>Brain wiring and cell types: the FlyWire connectome of an adult fruit fly brain. Dorkenwald et al., <a href="https://doi.org/10.1038/s41586-024-07558-y">Nature 2024</a>; Schlegel et al., <a href="https://doi.org/10.1038/s41586-024-07686-5">Nature 2024</a>.</li>
+      <li>Neuron model: Shiu et al., <a href="https://doi.org/10.1038/s41586-024-07763-9">Nature 2024</a>.</li>
+      <li>Brain and nerve cord drawing: the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., <a href="https://doi.org/10.1101/2025.10.09.680999">bioRxiv 2025</a>.</li>
+      <li>Dopamine learning rule: inspired by Bennett, Philippides and Nowotny, <a href="https://doi.org/10.1038/s41467-021-22592-4">Nature Communications 2021</a>.</li>
+    </ul>
+    <p>The game, the learning experiments and every result on this page come from this project's own simulation, not recordings from real flies.</p>
+  </footer>
 </div>
 <script type="module" src="js/app.js"></script>
 </body>
