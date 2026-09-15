@@ -79,7 +79,7 @@ Actions don't change what comes next, so this is a **contextual bandit**, not a 
 4. **Update.** Only KC→MBON connections onto the chosen group change: m ← clip(m + 0.15 · D · KC trace, 0, 4), where the KC spike trace has τ = 200 ms.
 5. **No press, no change.** A wait has no eligible synapses.
 
-This is built to avoid FlyPong's failure, where punishments wore down the useful synapses:
+This is built to avoid a common problem with simple dopamine learning rules, where punishments wear down the useful synapses:
 - The error shrinks to zero once a pathway predicts its reward.
 - Only the chosen pathway and recently active KCs are eligible.
 - The APL keeps KC codes sparse (about 20 of 2,597 KCs fire per lane).
@@ -88,7 +88,7 @@ This is built to avoid FlyPong's failure, where punishments wore down the useful
 
 ### Agent B: Deep-RL (frozen connectome + trained readout)
 
-Plasticity is off and the dopamine neurons get no input. A linear softmax policy reads log(1 + spike count) from the 313 descending neurons and is trained with REINFORCE and a running reward baseline, learning rate 0.002. This is the recipe most "fly brain plays X" demos use; PPO would add nothing on a one-step problem.
+Plasticity is off and the dopamine neurons get no input. A linear softmax policy reads log(1 + spike count) from the 313 descending neurons and is trained with REINFORCE and a running reward baseline, learning rate 0.002. PPO would add nothing on a one-step problem.
 
 ### Controls
 
@@ -203,7 +203,6 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 - Berg et al. 2025, *Sexual dimorphism in the complete connectome of the Drosophila male central nervous system*, bioRxiv. Janelia male CNS v1.0 (CC-BY), soma positions for the brain panel.
 - Bennett, Philippides & Nowotny 2021, *Learning with reinforcement prediction errors in a model of the Drosophila mushroom body*, Nature Communications.
 - Caron, Ruta, Abbott & Axel 2013, *Random convergence of olfactory inputs in the Drosophila mushroom body*, Nature.
-- The other fly-brain demos in the brief (Beat Saber fly, FlyPong, fly-tictactoe, Flappy Fly, Wordle fly) are described from the project brief and were not independently checked here.
 
 The typeface is Atkinson Hyperlegible Next (Braille Institute), under the SIL Open Font License 1.1 (`fonts/OFL.txt`).
 
