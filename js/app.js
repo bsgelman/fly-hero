@@ -199,7 +199,7 @@ function drawCompare() {
 
 function updateStory(ep) {
   const local = ep.t - LEAD_MS, slot = Math.floor(local / SLOT_MS), ph = local - slot * SLOT_MS;
-  const note = local >= 0 ? SONGS.train.notes[slot] : -1;
+  const note = local >= 0 ? (SONGS.train.notes[slot] ?? -1) : -1;
   const on = note < 0 ? '' : ph < 100 ? 'eyes' : ph < 200 ? 'memory' : ph < 240 ? 'output' : ph < 300 ? 'result' : ph < 340 ? 'dopamine' : 'update';
   for (const el of $('story').children) el.classList.toggle('on', el.dataset.s === on);
 }
@@ -266,7 +266,7 @@ function frame(now) {
     ep = S.ep;
     t = ep.t;
     resultOf = (s) => { const ev = ep.events[s]; return ev && (ev.action === ev.note ? 'hit' : ev.action === WAIT ? 'miss' : 'wrong'); };
-    $('hud').textContent = `Episode ${S.epNo} · "${SONGS.train.name}" · hits ${ep.hits} · misses ${ep.notes - ep.hits} · false presses ${ep.falsePresses}`;
+    $('hud').textContent = `Episode ${S.epNo} · "${SONGS.train.name}" · hits ${ep.hits} · wrong lane ${ep.wrong} · misses ${ep.misses} · false presses ${ep.falsePresses}`;
     $('progress').firstChild.style.width = `${(100 * ep.t) / songMs(SONGS.train)}%`;
     drawCurve();
   }
