@@ -182,7 +182,12 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 
 **Browser check.** Turbo looked stuck in one screenshot. Measured properly, it runs about 0.6 episodes per second; the screenshot had simply caught it right after a restart.
 
-**UI simplified after feedback.** The first page was a dark, neon-style dashboard: WebGL glow, labeled brain regions, a schematic nerve cord, a story strip and sound. Ben found it too busy and too obviously AI-made. It's now a plain white page with native controls, a black-on-white game, and a grey-dot brain on a 2D canvas. An accessibility pass followed: AA text contrast, visible keyboard focus, labelled canvases, dashed lines for Deep-RL, and 44px touch targets. A final design pass gave it a microscopy look: ink on white, GFP green and magenta for reward and punishment dopamine (the colour-blind-safe pair microscopists use), one legible typeface, and a figure-legend paragraph under the brain. The simulation and experiments are unchanged.
+**UI simplified after feedback.** The first page was a dark, neon-style dashboard: WebGL glow, labeled brain regions, a schematic nerve cord, a story strip and sound. Ben found it too busy and too obviously AI-made. It's now a plain white page with native controls, a black-on-white game, and a grey-dot brain on a 2D canvas. An accessibility pass followed: AA text contrast, visible keyboard focus, labelled canvases, dashed lines for Deep-RL, and 44px touch targets. A final design pass gave it a microscopy look: ink on white, GFP green and magenta for reward and punishment dopamine (the colour-blind-safe pair microscopists use), one legible typeface, and a figure-legend paragraph under the brain. The last cleanup pass:
+
+- **Font is self-hosted.** The page no longer needs the internet.
+- **Dark mode follows the system setting.** The canvases redraw from the same colour tokens.
+- **The chart uses shade and dashes instead of extra colours.** Shade shows the wiring and dashes show the learner.
+- **A missing-data message** now explains how to serve the folder. The simulation and experiments are unchanged.
 
 ## Sources
 
@@ -192,5 +197,7 @@ I picked 0.002 because it was the steadiest; a single-seed sweep is noisy. Agent
 - Bennett, Philippides & Nowotny 2021, *Learning with reinforcement prediction errors in a model of the Drosophila mushroom body*, Nature Communications.
 - Caron, Ruta, Abbott & Axel 2013, *Random convergence of olfactory inputs in the Drosophila mushroom body*, Nature.
 - The other fly-brain demos in the brief (Beat Saber fly, FlyPong, fly-tictactoe, Flappy Fly, Wordle fly) are described from the project brief and were not independently checked here.
+
+The typeface is Atkinson Hyperlegible Next (Braille Institute), under the SIL Open Font License 1.1 (`fonts/OFL.txt`).
 
 No branded game assets are used. "Fly Hero", the song names and the tones are original.

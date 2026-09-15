@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#FDFDFD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15181C" media="(prefers-color-scheme: dark)">
 <title>Fly Hero</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+<link rel="preload" href="fonts/atkinson-hyperlegible-next-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* Palette from fluorescence microscopy: ink on paper, GFP green for reward, magenta for punishment. */
-  :root { --paper: #FFFFFF; --ink: #1F2328; --graphite: #5E6670; --rule: #E3E6EA; --gfp: #2E8540; --magenta: #B0187A; --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+  /* Look borrowed from fluorescence microscopy figures: ink on paper, GFP green for reward, magenta for punishment.
+     Native CSS, no design system. Shapes: controls use a 2px radius, figures stay square. */
+  @font-face { font-family: "Atkinson Hyperlegible Next"; src: url("fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+  :root { color-scheme: light dark; --paper: #FDFDFD; --ink: #1F2328; --graphite: #5E6670; --rule: #E3E6EA; --faint: #8A939C; --hover: #F1F3F5; --gfp: #2E8540; --magenta: #B0187A; --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --paper: #15181C; --ink: #E6E8EB; --graphite: #A3ABB4; --rule: #2C3137; --faint: #69717A; --hover: #1E2227; --gfp: #5CC17A; --magenta: #E466B8; } }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--font); font-variant-numeric: tabular-nums; }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 72px; }
   .skip { position: absolute; left: 8px; top: -48px; background: var(--ink); color: var(--paper); padding: 6px 12px; }
@@ -26,7 +28,8 @@
   label { font-size: 15px; color: var(--graphite); }
   select, .btn { font: inherit; font-size: 15px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); border-radius: 2px; padding: 5px 10px; cursor: pointer; touch-action: manipulation; }
   select { margin-left: 6px; }
-  .btn:hover, select:hover { background: #F3F5F7; }
+  .btn:hover, select:hover { background: var(--hover); }
+  @media (prefers-reduced-motion: no-preference) { .btn:active { transform: translateY(1px); } }
   :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   @media (pointer: coarse) { select, .btn, .tabs button { min-height: 44px; } }
   main { display: grid; grid-template-columns: 300px 1fr; gap: 40px; margin-top: 40px; align-items: start; }
@@ -101,10 +104,10 @@
       </div>
     </div>
     <div>
-      <p id="brainHeader"></p>
-      <canvas id="brain" width="660" role="img" aria-label="Front view of the fly brain; simulated neurons flash when they spike"></canvas>
-      <p id="lastEvent" class="small" style="margin-top:12px"></p>
-      <p class="legend">Each grey dot is one of the 139,248 neurons in the FlyWire brain, seen from the front. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes dark as it spikes. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
+      <p id="brainHeader">&nbsp;</p>
+      <canvas id="brain" width="660" height="317" role="img" aria-label="Front view of the fly brain; simulated neurons flash when they spike"></canvas>
+      <p id="lastEvent" class="small" style="margin-top:12px">&nbsp;</p>
+      <p class="legend">Each grey dot is one of the 139,248 neurons in the FlyWire brain, seen from the front. When a note falls into a lane, that lane's visual neurons fire, then Kenyon cells, then the output neurons that choose a lane; each flashes as it spikes. For the Bio-RL fly, a hit releases <span class="gfp">reward dopamine</span> and a mistake releases <span class="magenta">punishment dopamine</span>, which strengthen or weaken the synapses that just fired.</p>
     </div>
   </main>
 </div>

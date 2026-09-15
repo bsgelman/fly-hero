@@ -228,3 +228,13 @@ The look is borrowed from fluorescence microscopy and the figures in a paper.
 - **Controls:** text tabs underlined for the current mode; outlined buttons with a 2px radius.
 - **Layout:** the brain is the one bold element; no cards, no rounded canvases. A figure-legend paragraph explains the brain panel.
 - **Wording:** sentence case, which reverses the Title Case from the previous pass.
+
+## 17. Design-taste pre-flight fixes
+
+- **Font is self-hosted.** `fonts/atkinson-hyperlegible-next-latin.woff2` covers weights 400-700, with `font-display: swap`; OFL licence included.
+- **Light and dark tokens.** Chosen by `prefers-color-scheme`. The canvases read the CSS variables and rebuild when the theme changes. Paper is `#FDFDFD`, not pure white.
+- **One accent pair.** GFP green and magenta, both for dopamine. Chart lines use shade for wiring and dashes for the learner; faint lines meet 3:1 contrast.
+- **Error state.** Missing data shows how to serve the folder.
+- **No layout shift.** The brain canvas has fixed dimensions (660×317).
+- **Press feedback.** Buttons move down 1px when pressed, unless reduced motion is on.
+- **Copy fixes.** The status line reads as a sentence, and counts use singular or plural correctly.

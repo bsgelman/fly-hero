@@ -1,6 +1,8 @@
 // Brain panel: every FlyWire v783 neuron as a grey dot (front view); simulated neurons flash when they spike.
+const rgb = (hex) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(',');
+
 export class Brain {
-  constructor(canvas, header, points, sub) {
+  constructor(canvas, header, points, sub, colors) {
     Object.assign(this, { canvas, header, sub });
     const W = canvas.width, H = (canvas.height = Math.round(W * sub.meta.aspect));
     this.ctx = canvas.getContext('2d');
@@ -9,13 +11,13 @@ export class Brain {
     bg.width = W;
     bg.height = H;
     const g = bg.getContext('2d');
-    g.fillStyle = '#fff';
+    g.fillStyle = colors.paper;
     g.fillRect(0, 0, W, H);
-    g.fillStyle = 'rgba(31,35,40,0.055)';
+    g.fillStyle = `rgba(${rgb(colors.ink)},0.06)`;
     for (let k = 0; k < points.length; k += 2) g.fillRect((points[k] / 65535) * W, (points[k + 1] / 65535) * H, 1, 1);
     const n = sub.neurons;
     this.xy = n.x.map((x, i) => [x * W, n.y[i] * H]);
-    this.rgb = n.role.map(r => (r === 'pam' ? '46,133,64' : r === 'ppl1' ? '176,24,122' : '31,35,40'));
+    this.rgb = n.role.map(r => (r === 'pam' ? rgb(colors.gfp) : r === 'ppl1' ? rgb(colors.magenta) : rgb(colors.ink)));
   }
 
   frame(net) {
