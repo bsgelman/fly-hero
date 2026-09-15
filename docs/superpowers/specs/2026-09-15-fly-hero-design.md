@@ -205,7 +205,7 @@ Male CNS, compartment-specific dopamine, a real nerve-cord neuron model, PPO, ch
 
 Ben found the first UI too busy and too obviously AI-made, and asked for something far more minimal. This replaces §10–§11. The simulation, agents, controls and experiments are unchanged.
 
-- **Page:** plain white page with default fonts and native buttons and selects. One `fly` menu covers the 7 conditions, a `speed` menu offers 1× / 4× / max, and a native `<progress>` shows song progress. No sound, no story strip.
+- **Page:** plain white page with default fonts and native buttons and selects. One `fly` menu covers the 7 conditions, a `speed` menu offers 0.5× / 1× / 4× / max, and a native `<progress>` shows song progress. No sound, no story strip.
 - **Game:** black note bars on white, 3 lane lines, a hit line and J K L labels. "fly" marks the fly's press.
 - **Brain:** one 2D canvas, no WebGL. The 139,248 neurons are pale grey dots, drawn once to an offscreen canvas. Simulated neurons flash black; PAM flashes green and PPL1 red. The header keeps the true counts.
 - **Removed:** glow, region labels and the schematic nerve cord, replaced by a one-line legend.

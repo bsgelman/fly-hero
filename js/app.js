@@ -68,7 +68,12 @@ function onFlyEvents(ep) {
 
 function advanceWatch(dt) {
   const deadline = performance.now() + 14;
-  let steps = S.speed === 'max' ? Infinity : Math.round(dt * S.speed);
+  let steps = Infinity;
+  if (S.speed !== 'max') { // carry leftover milliseconds so 0.5× runs at exactly half speed
+    S.carry = (S.carry || 0) + dt * S.speed;
+    steps = Math.floor(S.carry);
+    S.carry -= steps;
+  }
   while (steps-- > 0 && performance.now() < deadline) { // ponytail: slow machines just run slower than requested
     S.ep.step();
     onFlyEvents(S.ep);

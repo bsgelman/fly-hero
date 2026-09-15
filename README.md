@@ -12,7 +12,7 @@ python tools/serve.py
 
 Open http://localhost:8766. A plain `python -m http.server` also works, but browsers may then show an old copy after files change. No build step, no dependencies: plain HTML, canvas and ES modules.
 
-- **Watch the fly learn.** Episodes play back to back and the curve shows hit % per episode. One menu picks the fly: Agent A or B on real, shuffled or random wiring, or Agent A with dopamine blocked. Speeds are 1×, 4× and max.
+- **Watch the fly learn.** Episodes play back to back and the curve shows hit % per episode. One menu picks the fly: Agent A or B on real, shuffled or random wiring, or Agent A with dopamine blocked. Speeds are 0.5×, 1×, 4× and max.
 - **You vs fly.** Play the same song with J K L (±150 ms window). The fly plays alongside you with learning frozen.
 - **Compare learners.** Curves and a table from `data/results.json`.
 
