@@ -2,6 +2,8 @@
 
 A spiking model of a real fruit fly brain learns a three-lane rhythm game by trial and error. The learning happens inside the simulated brain: dopamine strengthens the synapses that led to a hit and weakens the ones that led to a mistake.
 
+**Live demo: [bsgelman.github.io/fly-hero](https://bsgelman.github.io/fly-hero/)**
+
 **32% of notes hit before practice, 99.6% after 30 songs, and 100% on a song it never heard.** With its dopamine neurons blocked, it stays at 35%.
 
 ![Fly Hero: the game on the left, the simulated brain and nerve cord on the right](docs/images/watch.png)
