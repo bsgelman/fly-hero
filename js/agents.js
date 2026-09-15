@@ -50,7 +50,7 @@ export class BioRL {
 }
 
 // lr picked from a seed-1 sweep {0.1, 0.01, 0.005, 0.002} (see README lab notebook)
-export const DEEP_DEFAULTS = { kcMbonGain: 8, lr: 0.002, baselineRate: 0.05 };
+export const DEEP_DEFAULTS = { lr: 0.002, baselineRate: 0.05 }; // network built with BIO_DEFAULTS.kcMbonGain for both agents
 
 export class DeepRL {
   constructor(net, opts = {}) {
