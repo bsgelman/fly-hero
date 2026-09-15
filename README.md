@@ -26,8 +26,8 @@ Janelia/Google male CNS connectome (public data)
 | `js/sim.js` | 162 | Leaky integrate-and-fire neurons on the real synapse list, plus the shuffled and random wiring controls |
 | `js/game.js` | 62 | Songs, rewards and a millisecond-level game loop |
 | `js/agents.js` | 102 | Bio-RL (dopamine learning inside the brain) and Deep-RL (a trained readout) |
-| `js/app.js` | 294 | The page: watch the fly learn, you vs fly, compare learners |
-| `js/brain.js` | 37 | Brain and nerve cord drawing |
+| `js/app.js` | 285 | The page: watch the fly learn, you vs fly, compare learners |
+| `js/brain.js` | 53 | Brain and nerve cord drawing |
 | `tools/run_experiments.mjs` | 68 | Runs every learner and control and writes `data/results.json` |
 | `tools/train_fly.mjs` | 23 | Trains the fly you play against |
 | `tools/test.mjs` | 69 | Checks for the neuron model, wiring controls, rewards and learning |
