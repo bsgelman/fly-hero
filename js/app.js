@@ -20,7 +20,7 @@ const points = new Uint16Array(pointsBuf);
 let C;
 function readTheme() {
   const cs = getComputedStyle(document.documentElement);
-  C = Object.fromEntries(['paper', 'ink', 'graphite', 'rule', 'faint', 'gfp', 'magenta'].map(k => [k, cs.getPropertyValue('--' + k).trim()]));
+  C = Object.fromEntries(['paper', 'ink', 'graphite', 'rule', 'faint', 'gfp', 'magenta', 'lane1', 'lane2', 'lane3', 'onlane'].map(k => [k, cs.getPropertyValue('--' + k).trim()]));
 }
 readTheme();
 let brain = new Brain($('brain'), $('brainHeader'), points, sub, C);
@@ -77,7 +77,7 @@ function advanceWatch(dt) {
 
 // ---------- you vs fly ----------
 function startHuman() {
-  S.human = { t0: performance.now() + 2000, res: [], hits: 0, extra: 0, done: false };
+  S.human = { t0: performance.now() + 2000, res: [], hits: 0, extra: 0, press: [-1e9, -1e9, -1e9], done: false };
   S.shadow = new Episode(S.net, S.agent, SONGS.train, { learn: false });
   S.seen = 0;
   S.flyPress = [-1e9, -1e9, -1e9];
@@ -105,6 +105,7 @@ addEventListener('keydown', (e) => {
   if (S.mode !== 'human' || lane === undefined || !h || h.done || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
   e.preventDefault(); // keep J/K/L from also changing a focused <select>
   const t = performance.now() - h.t0, notes = SONGS.train.notes;
+  h.press[lane] = t;
   let best = -1;
   for (let s = 0; s < notes.length; s++) {
     if (notes[s] !== lane || h.res[s] || Math.abs(hitTime(s) - t) > WINDOW_MS) continue;
@@ -117,8 +118,9 @@ addEventListener('keydown', (e) => {
 });
 
 // ---------- drawing ----------
-function drawGame(t, resultOf) {
-  const c = $('game'), g = c.getContext('2d'), W = c.width, H = c.height, lw = W / 3, hitY = H - 40;
+function drawGame(t, resultOf, humanPress) {
+  const c = $('game'), g = c.getContext('2d'), W = c.width, H = c.height, lw = W / 3, hitY = H - 56;
+  const lane = [C.lane1, C.lane2, C.lane3];
   g.clearRect(0, 0, W, H);
   g.fillStyle = C.rule;
   for (const x of [0, lw, 2 * lw, W - 1]) g.fillRect(Math.round(x), 0, 1, H);
@@ -127,16 +129,39 @@ function drawGame(t, resultOf) {
   const notes = SONGS.train.notes;
   for (let s = 0; s < notes.length; s++) {
     const n = notes[s], d = hitTime(s) - t, res = resultOf(s);
-    if (n < 0 || res === 'hit' || d > FALL_MS || d < -300) continue;
-    g.fillStyle = res ? C.faint : C.ink;
-    g.fillRect(n * lw + 15, hitY - (d / FALL_MS) * hitY - 6, lw - 30, 12);
+    if (n < 0 || d > FALL_MS || d < -400) continue;
+    if (res === 'hit') { // a ring in the lane colour grows and fades after a hit
+      const a = Math.max(0, 1 + d / 400);
+      g.globalAlpha = a;
+      g.strokeStyle = lane[n];
+      g.lineWidth = 3;
+      g.beginPath();
+      g.arc(n * lw + lw / 2, hitY, 16 + (1 - a) * 22, 0, 2 * Math.PI);
+      g.stroke();
+      g.globalAlpha = 1;
+    } else if (d > -300) {
+      g.fillStyle = res ? C.faint : lane[n];
+      g.fillRect(n * lw + 14, hitY - (d / FALL_MS) * hitY - 7, lw - 28, 14);
+    }
   }
-  g.font = '13px "Atkinson Hyperlegible Next", system-ui, sans-serif';
-  g.fillStyle = C.graphite;
+  g.font = '600 14px "Atkinson Hyperlegible Next", system-ui, sans-serif';
+  g.textAlign = 'center';
+  g.lineWidth = 2;
   for (let l = 0; l < 3; l++) {
-    g.fillText('JKL'[l], l * lw + lw / 2 - 4, H - 4);
-    if (t - S.flyPress[l] < 150) g.fillText('fly', l * lw + lw / 2 - 8, hitY + 16);
+    const x = l * lw + lw / 2, lit = humanPress ? t - humanPress[l] < 120 : t - S.flyPress[l] < 150;
+    g.fillStyle = lit ? lane[l] : C.paper;
+    g.fillRect(l * lw + 13, H - 41, lw - 26, 30);
+    g.strokeStyle = lane[l];
+    g.strokeRect(l * lw + 13, H - 41, lw - 26, 30);
+    g.fillStyle = lit ? C.onlane : C.ink;
+    g.fillText('JKL'[l], x, H - 21);
+    if (humanPress && t - S.flyPress[l] < 150) { // in you-vs-fly, mark the fly's press above the line
+      g.fillStyle = C.graphite;
+      g.fillText('fly', x, hitY - 8);
+    }
   }
+  g.textAlign = 'start';
+  g.lineWidth = 1;
 }
 
 function drawLines(canvas, series, colors, maxX, dashes = []) {
@@ -224,7 +249,7 @@ function frame(now) {
     $('prog').value = ep.t / songMs(SONGS.train);
     drawLines($('curve'), [S.curve], [C.ink], Math.max(30, S.curve.length - 1));
   }
-  if (S.mode !== 'compare') drawGame(t, resultOf);
+  if (S.mode !== 'compare') drawGame(t, resultOf, S.mode === 'human' ? S.human?.press : null);
   brain.frame(ep.net);
   requestAnimationFrame(frame);
 }

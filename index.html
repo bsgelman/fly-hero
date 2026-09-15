@@ -11,8 +11,8 @@
   /* Look borrowed from fluorescence microscopy figures: ink on paper, GFP green for reward, magenta for punishment.
      Native CSS, no design system. Shapes: controls use a 2px radius, figures stay square. */
   @font-face { font-family: "Atkinson Hyperlegible Next"; src: url("fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
-  :root { color-scheme: light dark; --paper: #FDFDFD; --ink: #1F2328; --graphite: #5E6670; --rule: #E3E6EA; --faint: #8A939C; --hover: #F1F3F5; --gfp: #2E8540; --magenta: #B0187A; --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
-  @media (prefers-color-scheme: dark) { :root { --paper: #15181C; --ink: #E6E8EB; --graphite: #A3ABB4; --rule: #2C3137; --faint: #69717A; --hover: #1E2227; --gfp: #5CC17A; --magenta: #E466B8; } }
+  :root { color-scheme: light dark; --paper: #FDFDFD; --ink: #1F2328; --graphite: #5E6670; --rule: #E3E6EA; --faint: #8A939C; --hover: #F1F3F5; --gfp: #2E8540; --magenta: #B0187A; --lane1: #D62828; --lane2: #1F6FEB; --lane3: #237A35; --onlane: #FFFFFF; --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --paper: #15181C; --ink: #E6E8EB; --graphite: #A3ABB4; --rule: #2C3137; --faint: #69717A; --hover: #1E2227; --gfp: #5CC17A; --magenta: #E466B8; --lane1: #F0555A; --lane2: #5B9BFF; --lane3: #4CC76A; --onlane: #15181C; } }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--font); font-variant-numeric: tabular-nums; }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 72px; }
   .skip { position: absolute; left: 8px; top: -48px; background: var(--ink); color: var(--paper); padding: 6px 12px; }
