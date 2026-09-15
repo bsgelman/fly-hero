@@ -5,73 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fly Hero</title>
 <style>
-  body { margin: 0; background: #0e0f12; color: #c9c9c9; font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; }
-  header { padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid #222; }
-  h1 { font-size: 16px; margin: 0 12px 0 0; color: #fff; }
-  button, select { background: #1c1d22; color: #ddd; border: 1px solid #333; font: inherit; padding: 3px 8px; cursor: pointer; }
-  button.on { background: #ddd; color: #111; }
-  main { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 16px; }
-  #left { width: 380px; max-width: 100%; }
-  #right { flex: 1; min-width: 320px; background: #000; padding: 8px; }
-  #brainWrap { position: relative; height: 660px; }
-  #brainWrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-  #progress { height: 4px; background: #222; margin: 4px 0 8px; }
-  #progress div { height: 100%; width: 0; background: #e9c46a; }
-  #story span { opacity: .3; margin-right: 6px; }
-  #story span.on { opacity: 1; color: #ffd27a; }
-  .small { color: #777; font-size: 11px; }
-  canvas { max-width: 100%; }
-  table { border-collapse: collapse; margin-top: 8px; font-size: 12px; }
-  td, th { padding: 2px 6px; border-bottom: 1px solid #222; text-align: right; }
-  td:first-child, th:first-child { text-align: left; }
-  i.sw { display: inline-block; width: 10px; height: 10px; margin-right: 5px; }
+  :root { --ink: #2F3437; --muted: #787774; --line: #EAEAEA; --bg: #FBFBFA; --green: #346538; --red: #9F2F2D; --mono: "SF Mono", Menlo, Consolas, monospace; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Helvetica Neue", Helvetica, system-ui, sans-serif; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
+  h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; color: #111; }
+  .lede { margin: 6px 0 32px; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  label { color: var(--muted); font-size: 14px; }
+  button, select { font: inherit; font-size: 14px; color: #111; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  button:hover, select:hover { border-color: #D5D4D0; }
+  button:active { transform: scale(0.98); }
+  .bar button[disabled] { background: #111; border-color: #111; color: #fff; cursor: default; transform: none; }
+  main { display: grid; grid-template-columns: 300px 1fr; gap: 48px; margin-top: 32px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  canvas { display: block; max-width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+  p { margin: 0 0 12px; }
+  .num { font-family: var(--mono); font-size: 13px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  progress { display: block; width: 100%; height: 3px; margin: 0 0 12px; border: 0; appearance: none; background: var(--line); }
+  progress::-webkit-progress-bar { background: var(--line); }
+  progress::-webkit-progress-value { background: #111; }
+  progress::-moz-progress-bar { background: #111; }
+  kbd { font-family: var(--mono); font-size: 12px; background: #F7F6F3; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+  table { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 13px; }
+  th { color: var(--muted); font-weight: 500; text-align: right; border-bottom: 1px solid var(--line); }
+  td, th { padding: 4px 0 4px 12px; }
+  td:first-child, th:first-child { text-align: left; padding-left: 0; }
+  .swatch { display: inline-block; width: 14px; height: 2px; margin: 0 8px 3px 0; }
+  .green { color: var(--green); } .red { color: var(--red); }
 </style>
 </head>
 <body>
-<header>
+<div class="wrap">
   <h1>Fly Hero</h1>
-  <button data-mode="watch" class="on">Watch the fly learn</button>
-  <button data-mode="human">You vs fly</button>
-  <button data-mode="compare">Compare learners</button>
-  <span>|</span>
-  <select id="agentSel"><option value="bio">Agent A · Bio-RL</option><option value="deep">Agent B · Deep-RL</option></select>
-  <select id="wiringSel"><option value="real">real wiring</option><option value="shuffled">shuffled wiring</option><option value="random">random network</option></select>
-  <label><input type="checkbox" id="blockedChk"> dopamine blocked</label>
-  <button id="resetBtn">new fly</button>
-  <span>|</span>
-  <button data-speed="1" class="on">1×</button><button data-speed="4">4×</button><button data-speed="turbo">turbo</button>
-  <label><input type="checkbox" id="soundChk" checked> sound</label>
-</header>
-<main>
-  <section id="left">
-    <div id="play">
-      <div id="hud">loading connectome…</div>
-      <div id="progress"><div></div></div>
-      <canvas id="game" width="380" height="520"></canvas>
-      <div id="humanBox" hidden>
-        <p>Keys <b>J K L</b> (or 1 2 3). Same song, same ±150 ms hit window. The fly plays alongside you with learning frozen.</p>
-        <button id="humanStart">start song</button>
-        <p id="humanMsg"></p>
+  <p class="lede">A spiking model of a real fruit-fly brain learns a three-lane rhythm game by trial and error.</p>
+
+  <div class="bar">
+    <button data-mode="watch" disabled>Watch the fly learn</button>
+    <button data-mode="human">You vs fly</button>
+    <button data-mode="compare">Compare learners</button>
+  </div>
+  <div class="bar">
+    <label>Fly
+      <select id="cond">
+        <option value="bio:real">Bio-RL, real wiring</option>
+        <option value="bio:shuffled">Bio-RL, shuffled wiring</option>
+        <option value="bio:random">Bio-RL, random network</option>
+        <option value="bio:blocked">Bio-RL, dopamine blocked</option>
+        <option value="deep:real">Deep-RL, real wiring</option>
+        <option value="deep:shuffled">Deep-RL, shuffled wiring</option>
+        <option value="deep:random">Deep-RL, random network</option>
+      </select>
+    </label>
+    <label>Speed
+      <select id="speed"><option value="1">1×</option><option value="4">4×</option><option value="max">max</option></select>
+    </label>
+    <button id="reset">New fly</button>
+  </div>
+
+  <main>
+    <div>
+      <div id="play">
+        <p id="hud" class="num">loading</p>
+        <progress id="prog" max="1" value="0"></progress>
+        <canvas id="game" width="300" height="420"></canvas>
+        <div id="humanBox" hidden>
+          <p style="margin-top:16px">Press <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> as a note reaches the line. The fly plays the same song with learning frozen.</p>
+          <button id="humanStart">Start</button>
+          <p id="humanMsg" style="margin-top:12px"></p>
+        </div>
+        <div id="curveBox">
+          <p class="muted" style="margin-top:24px">Hit rate per episode</p>
+          <canvas id="curve" width="300" height="120"></canvas>
+        </div>
       </div>
-      <div id="curveBox">
-        <canvas id="curve" width="380" height="150"></canvas>
-        <div class="small" id="agentNote"></div>
+      <div id="compare" hidden>
+        <p class="muted">Five seeds, 30 episodes each, from <span class="num">node tools/run_experiments.mjs</span>. Episode 0 is a play before any learning.</p>
+        <canvas id="cmp" width="300" height="200"></canvas>
+        <div id="cmpTable"></div>
       </div>
     </div>
-    <div id="compare" hidden>
-      <p>Headless runs: <code>node tools/run_experiments.mjs</code>, 5 seeds × 30 episodes on "Banana Drift", then one frozen play of an unseen song. Episode 0 is a frozen play before any learning. Bands are ±1 sd across seeds.</p>
-      <canvas id="cmp" width="380" height="300"></canvas>
-      <div id="cmpTable"></div>
+    <div>
+      <p id="brainHeader" class="num"></p>
+      <canvas id="brain" width="620"></canvas>
+      <p class="muted" style="margin-top:12px">Grey dots are all 139,248 FlyWire neurons, seen from the front. Flashes are simulated spikes, with <span class="green">reward</span> and <span class="red">punishment</span> dopamine in colour.</p>
+      <p id="lastEvent" class="num"></p>
     </div>
-  </section>
-  <section id="right">
-    <div id="brainHeader">…</div>
-    <div class="small">front view · points = 139,248 FlyWire v783 neuron positions · bright = simulated spikes (LIF model), unsimulated neurons never flash</div>
-    <div id="brainWrap"><canvas id="brainGl"></canvas><canvas id="brainOverlay"></canvas></div>
-    <div id="story"><span data-s="eyes">note → eyes</span><span data-s="memory">→ memory (KCs)</span><span data-s="output">→ output (MBON/DN)</span><span data-s="result">→ hit/miss</span><span data-s="dopamine">→ dopamine</span><span data-s="update">→ synapses update</span></div>
-    <div id="lastEvent" class="small">&nbsp;</div>
-  </section>
-</main>
+  </main>
+</div>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
