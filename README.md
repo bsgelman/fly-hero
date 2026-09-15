@@ -105,7 +105,7 @@ To rebuild the network from the raw connectome, download three files from the [J
 ## Based on published research
 
 - **Neuron model:** Shiu et al., [Nature 2024](https://doi.org/10.1038/s41586-024-07763-9).
-- **Brain wiring, cell types and drawing:** the male fruit fly connectome from Janelia Research Campus and Google. Berg et al., [Cell 2026](https://doi.org/10.1016/j.cell.2026.08.015).
+- **Brain wiring, cell types and drawing:** the male fruit fly connectome (male CNS v1.0), released open source by Janelia Research Campus, Google Research, the University of Cambridge and the MRC Laboratory of Molecular Biology. Berg et al., [Cell 2026](https://doi.org/10.1016/j.cell.2026.08.015). [Data](https://male-cns.janelia.org/) (CC-BY) and [Google Research announcement](https://research.google/blog/a-connectomics-milestone-mapping-the-complete-male-fruit-fly-brain/).
 - **Dopamine learning rule:** inspired by Bennett, Philippides and Nowotny, [Nature Communications 2021](https://doi.org/10.1038/s41467-021-22592-4).
 
 ## License
