@@ -64,6 +64,7 @@
   .guide dt { margin-top: 10px; font-weight: 600; }
   .guide dd { margin: 2px 0 0; max-width: 60ch; color: var(--graphite); }
   .takeaway { margin-top: 24px; max-width: 60ch; }
+  .guide .note { margin: 4px 0 0; max-width: 60ch; color: var(--graphite); }
   /* the result text flashes with the dopamine that fired, then fades back like the neuron flashes */
   .flash-gfp { font-weight: 600; animation: flash-gfp 900ms ease-out forwards; }
   .flash-magenta { font-weight: 600; animation: flash-magenta 900ms ease-out forwards; }
@@ -144,6 +145,8 @@
               <dt>Dopamine blocked</dt>
               <dd>Bio-RL with its reward and punishment signal switched off. If it stops learning, dopamine is what does the learning.</dd>
             </dl>
+            <h3>Deep-RL, real wiring, 150 plays</h3>
+            <p class="note">An extra check to be fair to Deep-RL. It learns slowly, so this version got five times the practice: 150 plays instead of 30, repeated 3 times. It still only reached 75% (68% on the unseen song), well below the 96% Bio-RL reached after just 30 plays. For this row, Last 5 means plays 146 to 150, and it has no line on the chart because the chart stops at play 30.</p>
             <h3>What the numbers mean</h3>
             <dl>
               <dt>Before</dt>
