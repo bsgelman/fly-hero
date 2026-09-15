@@ -54,6 +54,12 @@
   td:first-child, th:first-child { text-align: left; padding-left: 0; }
   .swatch { display: inline-block; width: 16px; height: 0; border-top: 2px solid; margin-right: 8px; vertical-align: middle; }
   .gfp { color: var(--gfp); } .magenta { color: var(--magenta); }
+  /* the result text flashes with the dopamine that fired, then fades back like the neuron flashes */
+  .flash-gfp { font-weight: 600; animation: flash-gfp 900ms ease-out forwards; }
+  .flash-magenta { font-weight: 600; animation: flash-magenta 900ms ease-out forwards; }
+  @keyframes flash-gfp { from { color: var(--gfp); } 60% { color: var(--gfp); } to { color: var(--graphite); } }
+  @keyframes flash-magenta { from { color: var(--magenta); } 60% { color: var(--magenta); } to { color: var(--graphite); } }
+  @media (prefers-reduced-motion: reduce) { .flash-gfp { animation: none; color: var(--gfp); } .flash-magenta { animation: none; color: var(--magenta); } }
 </style>
 </head>
 <body>

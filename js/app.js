@@ -58,7 +58,11 @@ function onFlyEvents(ep) {
     if (ev.action !== WAIT) S.flyPress[ev.action] = ev.t;
     const dopamine = a.kind !== 'bio' ? '' : a.o.blocked ? ', dopamine blocked' : a.delta > 0 ? ', reward dopamine' : a.delta < 0 ? ', punishment dopamine' : '';
     const verdict = ev.note < 0 ? (ev.action === WAIT ? 'correct wait' : 'stray press') : ev.action === ev.note ? 'hit' : ev.action === WAIT ? 'miss' : 'wrong lane';
-    $('lastEvent').textContent = `${ev.note < 0 ? 'Empty beat' : 'Note in lane ' + (ev.note + 1)}, ${ev.action === WAIT ? 'waited' : 'pressed lane ' + (ev.action + 1)}: ${verdict} (${ev.reward > 0 ? '+' : ''}${ev.reward})${dopamine}`;
+    const el = $('lastEvent'), result = document.createElement('span');
+    el.textContent = `${ev.note < 0 ? 'Empty beat' : 'Note in lane ' + (ev.note + 1)}, ${ev.action === WAIT ? 'waited' : 'pressed lane ' + (ev.action + 1)}: `;
+    result.textContent = `${verdict} (${ev.reward > 0 ? '+' : ''}${ev.reward})${dopamine}`;
+    if (a.kind === 'bio' && !a.o.blocked && a.delta) result.className = a.delta > 0 ? 'flash-gfp' : 'flash-magenta'; // same colour as the dopamine neurons
+    el.append(result);
   }
 }
 
