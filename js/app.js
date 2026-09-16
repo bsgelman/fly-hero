@@ -205,9 +205,9 @@ function drawLines(canvas, series, colors, maxX, dashes = [], x0 = 0) {
   });
 }
 
-// Line shade encodes the wiring, dashes encode the learner; magenta is the dopamine-blocked control.
+// Line colour encodes the wiring, dashes encode the learner; magenta is the dopamine-blocked control.
 const NAMES = { 'A-real': 'Bio-RL, real wiring', 'A-shuffled': 'Bio-RL, shuffled wiring', 'A-random': 'Bio-RL, random network', 'A-dopamine-blocked': 'Bio-RL, dopamine blocked', 'B-real': 'Deep-RL, real wiring', 'B-shuffled': 'Deep-RL, shuffled wiring', 'B-random': 'Deep-RL, random network', 'B-real-150ep': 'Deep-RL, real wiring, 150 songs' };
-const SERIES = { 'A-real': ['ink', []], 'A-shuffled': ['graphite', []], 'A-random': ['faint', []], 'A-dopamine-blocked': ['magenta', []], 'B-real': ['ink', [5, 3]], 'B-shuffled': ['graphite', [5, 3]], 'B-random': ['faint', [5, 3]] };
+const SERIES = { 'A-real': ['ink', []], 'A-shuffled': ['lane2', []], 'A-random': ['lane3', []], 'A-dopamine-blocked': ['magenta', []], 'B-real': ['ink', [5, 3]], 'B-shuffled': ['lane2', [5, 3]], 'B-random': ['lane3', [5, 3]] };
 
 function drawCompare() {
   if (!results) {
@@ -221,7 +221,7 @@ function drawCompare() {
   });
   drawLines($('cmp'), means, names.map(n => C[SERIES[n][0]]), results.meta.episodes, names.map(n => SERIES[n][1]));
   const pct = (v) => `${(100 * v).toFixed(1)}%`; // one decimal, so 99.6% is not shown as 100%
-  $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. Dark, grey and light lines are real wiring, shuffled wiring and random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before practice</th><th scope="col">End of practice</th><th scope="col">New song</th></tr>' +
+  $('cmpTable').innerHTML = '<table><caption class="small">Solid lines are Bio-RL and dashed lines are Deep-RL. White lines are the real wiring, blue lines shuffled wiring and green lines a random network. The magenta line is Bio-RL with dopamine blocked.</caption><tr><th scope="col">Fly</th><th scope="col">Before practice</th><th scope="col">End of practice</th><th scope="col">New song</th></tr>' +
     Object.entries(results.conditions).map(([n, c]) =>
       `<tr><td><span class="swatch" aria-hidden="true" style="border-top-color:${SERIES[n] ? C[SERIES[n][0]] : 'transparent'};border-top-style:${n.startsWith('B-') ? 'dashed' : 'solid'}"></span>${NAMES[n] || n}</td><td class="num">${pct(c.summary.before)}</td><td class="num">${pct(c.summary.last5)}</td><td class="num">${pct(c.summary.test)}</td></tr>`).join('') +
     '</table>';
